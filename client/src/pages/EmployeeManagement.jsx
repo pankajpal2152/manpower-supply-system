@@ -1,16 +1,362 @@
+// import React from "react";
+// import "bootstrap/dist/css/bootstrap.min.css";
+
+// function EmployeeManagement() {
+//   return (
+//     <div className="container" style={{ marginTop: "50px" }}>
+//       <div class="btn-group d-flex" role="group">
+//         <button type="button" class="btn btn-primary btn-lg btn-block">
+//           Employee Registration Form
+//         </button>
+//       </div>
+
+//       <form class="row g-3">
+//         <div className="col-md-4">
+//           <label for="inputFirstName" class="form-label">
+//             First Name
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="FirstName"
+//             placeholder="First Name"
+//           />
+//         </div>
+//         <div className="col-md-4">
+//           <label for="inputMiddleName" class="form-label">
+//             Middle Name
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="MiddleName"
+//             placeholder="Middle Name"
+//           />
+//         </div>
+//         <div className="col-md-4">
+//           <label for="inputLastName" class="form-label">
+//             Last Name
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="LastName"
+//             placeholder="Last Name"
+//           />
+//         </div>
+
+//         <div class="col-6">
+//           <label for="FathersName" class="form-label">
+//             Father's Name
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="FathersName"
+//             placeholder="Father's Name"
+//           />
+//         </div>
+//         <div class="col-6">
+//           <label for="inputMothersName" class="form-label">
+//             Mother's Name
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="MothersName"
+//             placeholder="Mother's Name"
+//           />
+//         </div>
+//         <div className="col-md-4">
+//           <label for="inputCity" class="form-label">
+//             City
+//           </label>
+//           <input type="text" className="form-control" id="inputCity" />
+//         </div>
+//         <div className="col-md-4">
+//           <label for="inputState" class="form-label">
+//             State
+//           </label>
+//           <select id="inputState" className="form-select">
+//             <option selected>Choose...</option>
+//             <option>...</option>
+//           </select>
+//         </div>
+//         <div className="col-md-4">
+//           <label for="inputDistrict" class="form-label">
+//             District
+//           </label>
+//           <select id="inputDistrict" className="form-select">
+//             <option selected>Choose...</option>
+//             <option>...</option>
+//           </select>
+//         </div>
+
+//         <div className="col-md-6">
+//           <label for="inputPincode" className="form-label">
+//             Pincode
+//           </label>
+//           <input type="text" 
+//                 class="form-control form-control-sm" 
+//                 id="PinCode" placeholder="Pincode" />
+//         </div>
+
+//         <div className="col-md-6">
+//           <label for="inputEmail" class="form-label">
+//             Email
+//           </label>
+//           <input
+//             type="email"
+//             class="form-control form-control-sm"
+//             id="inputEmail"
+//             placeholder="Email"
+//           />
+//         </div>
+//         <div className="col-md-6">
+//           <label for="inputPhoneNo" class="form-label">
+//             Phone No
+//           </label>
+//           <input type="text" className="form-control form-control-sm" id="PhoneNo" />
+//         </div>
+
+//         <div className="col-6">
+//           <div className="form-check">
+//             <input
+//               className="form-check-input"
+//               type="checkbox"
+//               id="gridCheck"
+//             />
+//             <label className="form-check-label" htmlFor="gridCheck">
+//               Check me out
+//             </label>
+//           </div>
+//         </div>
+//         <div className="col-6">
+//           <div className="form-check">
+//             <input
+//               className="form-check-input"
+//               type="checkbox"
+//               id="gridCheck"
+//             />
+//             <label className="form-check-label" htmlFor="gridCheck">
+//               Check me out
+//             </label>
+//           </div>
+//         </div>
+
+//         <div class="col-md-6">
+//           <label for="inputEmail" class="form-label">
+//             Pan No
+//           </label>
+//           <input
+//             type="email"
+//             class="form-control form-control-sm"
+//             id="inputEmail"
+//             placeholder="Pan No"
+//           />
+//         </div>
+//         <div class="col-md-6">
+//           <label for="inputPanno" class="form-label">
+//             Addhar No
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="inputPanno"
+//             placeholder="Addhar No"
+//           />
+//         </div>
+//         <div class="col-12">
+//   <label for="inputAddress" class="form-label">
+//             Marital Status
+//           </label>
+//           <div class="container d-flex mt-4 p-4">
+//             <div class="form-check form-check-inline m->">
+//                 <input class="form-check-input" 
+//                        type="radio" 
+//                        name="options" 
+//                        id="defaultRadioSwitch" 
+//                        autocomplete="off"/>
+//                 <label class="form-check-label" 
+//                        for="defaultRadioSwitch">
+//                     Default Radio
+//                 </label>
+//             </div>
+//             <div class="form-check form-check-inline m->">
+//                 <input class="form-check-input" 
+//                        type="radio" 
+//                        name="options" 
+//                        id="checkedRadioSwitch" 
+//                        autocomplete="off" 
+//                        checked/>
+//                 <label class="form-check-label" 
+//                        for="checkedRadioSwitch">
+//                     Checked Radio
+//                 </label>
+//             </div>
+//             <div class="form-check form-check-inline m->">
+//                 <input class="form-check-input" 
+//                        type="radio" 
+//                        name="option" 
+//                        id="disabledRadioSwitch" 
+//                        />
+//                 <label class="form-check-label" 
+//                        for="disabledRadioSwitch">
+//                     Disabled Radio
+//                   </label>
+//             </div>
+//             <div class="form-check form-check-inline m->">
+//                 <input class="form-check-input" 
+//                        type="radio" 
+//                        name="option" 
+//                        id="checkedDisabledRadioSwitch" 
+//                        checked
+//                        disabled/>
+//                 <label class="form-check-label" 
+//                        for="checkedDisabledRadioSwitch">
+//                     Checked and Disabled Radio
+//                   </label>
+//             </div>
+//         </div>
+// </div>
+
+
+//         <div class="col-md-6">
+//           <label for="inputCity" class="form-label">
+//             Bank Name
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="inputCity"
+//           />
+//         </div>
+//         <div class="col-md-3">
+//           <label for="inputCity" class="form-label">
+//             IFS Code
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="inputCity"
+//           />
+//         </div>
+//         <div class="col-md-3">
+//           <label for="inputZip" class="form-label">
+//             Account No
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="inputZip"
+//           />
+//         </div>
+//         <div class="col-12">
+//           <label for="inputAddress2" class="form-label">
+//             Bank Address
+//           </label>
+//           <input
+//             type="text"
+//             class="form-control form-control-sm"
+//             id="inputAddress2"
+//             placeholder="Apartment, studio, or floor"
+//           />
+//         </div>
+//         <div class="col-12">
+//           <div class="form-check form-check-inline">
+//             <input
+//               class="form-check-input"
+//               type="checkbox"
+//               id="inlineCheckbox1"
+//               value="option1"
+//             />
+//             <label class="form-check-label" for="inlineCheckbox1">
+//               address1
+//             </label>
+//           </div>
+//           <div class="form-check form-check-inline">
+//             <input
+//               class="form-check-input"
+//               type="checkbox"
+//               id="inlineCheckbox2"
+//               value="option2"
+//             />
+//             <label class="form-check-label" for="inlineCheckbox2">
+//               2
+//             </label>
+//           </div>
+//           <div class="form-check form-check-inline">
+//             <input
+//               class="form-check-input"
+//               type="checkbox"
+//               id="inlineCheckbox3"
+//               value="option3"
+//             />
+//             <label class="form-check-label" for="inlineCheckbox3">
+//               address3
+//             </label>
+//           </div>
+//         </div>
+
+//         <div class="d-flex bd-highlight">
+//             <div class="p-2 flex-fill bd-highlight">Flex item with a lot of content
+//                  <div class="form-check">
+//               <label class="radio-inline">
+//                 <input type="radio" name="status" /> Single
+//               </label>
+//             </div>
+//             </div>
+//   <div class="p-2 flex-fill bd-highlight">Flex item with a lot of content
+//      <div class="form-check">
+//               <label class="radio-inline">
+//                 <input type="radio" name="status" /> Single
+//               </label>
+//             </div>
+//   </div>
+//   <div class="p-2 flex-fill bd-highlight">Flex item
+//      <div class="form-check">
+//               <label class="radio-inline">
+//                 <input type="radio" name="status" /> Single
+//               </label>
+//             </div>
+//   </div>
+//   <div class="p-2 flex-fill bd-highlight">Flex item
+//      <div class="form-check">
+//               <label class="radio-inline">
+//                 <input type="radio" name="status" /> Single
+//               </label>
+//             </div>
+//   </div>
+// </div>
+
+//         <div class="col-4"></div>
+//         <div class="col-4">
+//           <button type="button" class="btn btn-primary">
+//             Submit
+//           </button>
+//         </div>
+//         <div class="col-4"></div>
+//       </form>
+//     </div>
+//   );
+// }
+
+// export default EmployeeManagement;
+
+
 import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
-import "bootstrap/dist/css/bootstrap.min.css"; 
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  
+
   const [formData, setFormData] = useState({
     firstName: '', middleName: '', lastName: '', fathersName: '', mothersName: '',
     city: '', state: '', district: '', pinCode: '', email: '', phoneNo: '',
-    panNo: '', aadharNo: '', maritalStatus: 'Single', bankName: '', ifscCode: '', 
+    panNo: '', aadharNo: '', maritalStatus: 'Single', bankName: '', ifscCode: '',
     accountNo: '', bankAddress: '', department: 'General', position: 'Staff', status: 'Available', baseSalary: 0
   });
 
@@ -34,7 +380,7 @@ const EmployeeManagement = () => {
     setFormData({
       firstName: '', middleName: '', lastName: '', fathersName: '', mothersName: '',
       city: '', state: '', district: '', pinCode: '', email: '', phoneNo: '',
-      panNo: '', aadharNo: '', maritalStatus: 'Single', bankName: '', ifscCode: '', 
+      panNo: '', aadharNo: '', maritalStatus: 'Single', bankName: '', ifscCode: '',
       accountNo: '', bankAddress: '', department: 'General', position: 'Staff', status: 'Available', baseSalary: 0
     });
     setIsModalOpen(true);
@@ -75,8 +421,8 @@ const EmployeeManagement = () => {
 
   const SectionHeader = ({ title }) => (
     <div className="col-12 mt-4 mb-3">
-      <h5 className="text-start text-primary fw-bold p-2 mb-0 rounded shadow-sm" 
-          style={{ backgroundColor: '#f0f9ff', borderLeft: '6px solid #0ea5e9' }}>
+      <h5 className="text-start text-primary fw-bold p-2 mb-0 rounded shadow-sm"
+        style={{ backgroundColor: '#f0f9ff', borderLeft: '6px solid #0ea5e9' }}>
         {title}
       </h5>
     </div>
@@ -186,9 +532,9 @@ const EmployeeManagement = () => {
 
       {isModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1050, padding: '20px' }}>
-          
+
           <div className="card shadow-lg border-0" style={{ width: '100%', maxWidth: '1200px', maxHeight: '95vh', overflowY: 'auto', borderRadius: '12px' }}>
-            
+
             <div className="card-header text-white d-flex justify-content-between align-items-center position-sticky top-0" style={{ zIndex: 10, backgroundColor: '#0f172a', borderBottom: '4px solid #0ea5e9' }}>
               <h4 className="mb-0 fw-bold py-1">{editingId ? 'Edit Employee Registration' : 'Employee Registration Form'}</h4>
               <button type="button" className="btn-close btn-close-white" onClick={() => setIsModalOpen(false)} aria-label="Close"></button>
@@ -196,10 +542,10 @@ const EmployeeManagement = () => {
 
             <div className="card-body bg-white p-4">
               <form className="row custom-form-row" onSubmit={handleSubmit}>
-                
+
                 {/* --- Personal Information --- */}
                 <SectionHeader title="Personal Information" />
-                
+
                 <div className="col-lg-4 col-md-6">
                   <div className="modern-form-group">
                     <label htmlFor="firstName" className="modern-label">First Name</label>
@@ -234,7 +580,7 @@ const EmployeeManagement = () => {
 
                 {/* --- Contact & Address --- */}
                 <SectionHeader title="Contact & Address" />
-                
+
                 <div className="col-lg-4 col-md-6">
                   <div className="modern-form-group">
                     <label htmlFor="city" className="modern-label">City</label>
@@ -271,7 +617,7 @@ const EmployeeManagement = () => {
                     <input type="email" className="modern-input" name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" required />
                   </div>
                 </div>
-                
+
                 <div className="col-md-6">
                   <div className="modern-form-group">
                     <label htmlFor="phoneNo" className="modern-label">Phone No</label>
@@ -302,15 +648,15 @@ const EmployeeManagement = () => {
                     <div className="d-flex flex-grow-1 gap-4 align-items-center">
                       <div className="form-check m-0">
                         <input className="form-check-input modern-radio" type="radio" name="maritalStatus" value="Single" checked={formData.maritalStatus === 'Single'} onChange={handleChange} id="radioSingle" />
-                        <label className="form-check-label ps-1" htmlFor="radioSingle" style={{cursor: 'pointer', color: '#475569'}}>Single</label>
+                        <label className="form-check-label ps-1" htmlFor="radioSingle" style={{ cursor: 'pointer', color: '#475569' }}>Single</label>
                       </div>
                       <div className="form-check m-0">
                         <input className="form-check-input modern-radio" type="radio" name="maritalStatus" value="Married" checked={formData.maritalStatus === 'Married'} onChange={handleChange} id="radioMarried" />
-                        <label className="form-check-label ps-1" htmlFor="radioMarried" style={{cursor: 'pointer', color: '#475569'}}>Married</label>
+                        <label className="form-check-label ps-1" htmlFor="radioMarried" style={{ cursor: 'pointer', color: '#475569' }}>Married</label>
                       </div>
                       <div className="form-check m-0">
                         <input className="form-check-input modern-radio" type="radio" name="maritalStatus" value="Other" checked={formData.maritalStatus === 'Other'} onChange={handleChange} id="radioOther" />
-                        <label className="form-check-label ps-1" htmlFor="radioOther" style={{cursor: 'pointer', color: '#475569'}}>Other</label>
+                        <label className="form-check-label ps-1" htmlFor="radioOther" style={{ cursor: 'pointer', color: '#475569' }}>Other</label>
                       </div>
                     </div>
                   </div>
