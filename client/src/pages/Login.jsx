@@ -6,7 +6,7 @@ const styles = {
     container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f5f5f9', fontFamily: '"Public Sans", sans-serif', position: 'relative', overflow: 'hidden', padding: '20px' },
     card: { backgroundColor: '#ffffff', borderRadius: '8px', boxShadow: '0 2px 6px 0 rgba(67, 89, 113, 0.12)', padding: '40px', width: '100%', maxWidth: '400px', zIndex: 1 },
     logoContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '24px', gap: '8px' },
-    logoImage: { maxHeight: '60px', objectFit: 'contain' }, // Slightly adjusted for standard logos
+    logoImage: { maxHeight: '60px', objectFit: 'contain' },
     welcomeText: { fontSize: '1.25rem', fontWeight: '500', color: '#566a7f', marginBottom: '8px', marginTop: 0 },
     subText: { fontSize: '0.9375rem', color: '#697a8d', marginBottom: '24px', lineHeight: '1.5' },
     formGroup: { marginBottom: '16px' },
@@ -26,7 +26,7 @@ const styles = {
     successText: { color: '#198754', fontSize: '0.875rem', marginBottom: '15px', textAlign: 'center', backgroundColor: '#d1e7dd', padding: '8px', borderRadius: '4px' }
 };
 
-// Standard roles mapped from our architecture diagram
+// Hardcoded roles for the public registration page (Superadmin manages deep permissions later)
 const availableRoles = ['Superadmin', 'HR Admin', 'Employee', 'Client'];
 
 // ==========================================
@@ -50,17 +50,17 @@ const LoginForm = ({ onToggleView }) => {
         }
 
         try {
-            // Talk to our backend API!
+            // Send login request to our backend API
             const response = await api.post('/auth/login', { 
                 email: credentials.email, 
                 password: credentials.password 
             });
 
-            // Save the JWT token and User data securely
+            // Save the JWT token and User data securely to localStorage
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
             
-            // Redirect to our secure layout
+            // Redirect to the secure dashboard
             navigate('/dashboard');
         } catch (err) {
             console.error("Login failed:", err);
@@ -71,7 +71,7 @@ const LoginForm = ({ onToggleView }) => {
     return (
         <div style={styles.card}>
             <div style={styles.logoContainer}>
-                {/* Fallback to text if logo.png is missing */}
+                {/* App Name acting as logo */}
                 <h2 style={{ color: '#696cff', fontWeight: 'bold', margin: 0 }}>ManpowerApp</h2>
             </div>
             <h3 style={styles.welcomeText}>Welcome! 👋</h3>
@@ -135,7 +135,7 @@ const SignupForm = ({ onToggleView }) => {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     
-    // Splitting username into firstName and lastName to match our DB!
+    // Splitting username into firstName and lastName to exactly match our database model!
     const [credentials, setCredentials] = useState({
         role: '', firstName: '', lastName: '', email: '', password: ''
     });
@@ -153,6 +153,7 @@ const SignupForm = ({ onToggleView }) => {
         }
 
         try {
+            // Send registration request to our backend API
             await api.post('/auth/register', {
                 firstName: credentials.firstName,
                 lastName: credentials.lastName,
@@ -162,7 +163,7 @@ const SignupForm = ({ onToggleView }) => {
 
             setSuccess('Account created successfully! You can now log in.');
             setTimeout(() => {
-                onToggleView(); // Switch back to login after 2 seconds
+                onToggleView(); // Automatically switch back to login after 2 seconds
             }, 2000);
             
         } catch (err) {
@@ -200,7 +201,7 @@ const SignupForm = ({ onToggleView }) => {
                     </select>
                 </div>
 
-                {/* Using a split layout for First/Last name to match DB */}
+                {/* Using a split layout for First/Last name to match DB requirements */}
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <div style={{ ...styles.formGroup, flex: 1 }}>
                         <label htmlFor="firstName" style={styles.label}>First Name</label>
