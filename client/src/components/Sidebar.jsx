@@ -17,8 +17,8 @@ const Sidebar = ({ user }) => {
 
   // The Magic Filter: Only show the menu if the user's permission array includes the required permission!
   const visibleMenuItems = menuItems.filter(item => {
-    // If the user has no permissions loaded yet, hide everything
-    if (!user || !user.permissions) return false; 
+    // Bulletproof Safety check: Ensure user exists and permissions is actually an array
+    if (!user || !Array.isArray(user.permissions)) return false; 
     
     // Check if their exact permission array contains the required permission for this menu
     return user.permissions.includes(item.requiredPermission);
@@ -45,6 +45,8 @@ const Sidebar = ({ user }) => {
             <Link 
               key={item.name} 
               to={item.path}
+              // Accessibility enhancement: Tells screen readers this is the current page
+              aria-current={isActive ? 'page' : undefined}
               style={{
                 color: isActive ? '#38bdf8' : '#cbd5e1',
                 textDecoration: 'none',
@@ -57,7 +59,8 @@ const Sidebar = ({ user }) => {
                 transition: 'background 0.2s'
               }}
             >
-              <span>{item.icon}</span>
+              {/* Accessibility enhancement: Hides the emoji from screen readers to prevent clutter */}
+              <span aria-hidden="true">{item.icon}</span>
               {item.name}
             </Link>
           );

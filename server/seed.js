@@ -1,13 +1,17 @@
 const bcrypt = require('bcryptjs');
 require('dotenv').config();
+// Ensure the path to your models folder is correct
 const { sequelize, User, Role, Permission } = require('./models');
 
 const seedDatabase = async () => {
   try {
-    console.log('Connecting to the database...');
+    console.log('--- 🚀 Starting Database Seed ---');
+    
+    // Test the connection
     await sequelize.authenticate();
+    console.log('📡 Database connection verified.');
 
-    // 1. Define all the permissions based on your system diagram
+    // 1. Define all the permissions based on the system modules
     const permissionsData = [
       { name: 'VIEW_DASHBOARD', module: 'Dashboard', description: 'View main overview' },
       { name: 'MANAGE_EMPLOYEES', module: 'Employee Management', description: 'Add, edit, delete employees' },
@@ -20,30 +24,30 @@ const seedDatabase = async () => {
     ];
 
     console.log('🌱 Seeding Permissions...');
-    // We use ignoreDuplicates so it won't crash if you run the script twice
+    // ignoreDuplicates prevents errors if the permissions already exist
     await Permission.bulkCreate(permissionsData, { ignoreDuplicates: true });
 
-    // 2. Create the Superadmin Role
-    console.log('👑 Seeding Superadmin Role...');
+    // 2. Create or Find the Superadmin Role
+    console.log('👑 Configuring Superadmin Role...');
     const [superAdminRole] = await Role.findOrCreate({
       where: { name: 'Superadmin' },
       defaults: { description: 'Ultimate access to all modules' }
     });
 
-    // Assign ALL permissions to the Superadmin role automatically
+    // Sync Permissions to Role (This populates the RolePermissions junction table)
     const allPermissions = await Permission.findAll();
     await superAdminRole.setPermissions(allPermissions);
+    console.log('✅ All permissions linked to Superadmin role.');
 
-    // 3. Create the Superadmin User
-    console.log('👤 Seeding Superadmin User...');
+    // 3. Create the Default Superadmin User
     const adminEmail = 'admin@manpower.com';
     const adminPassword = 'adminpassword123';
 
-    // Check if the admin already exists
+    console.log('👤 Checking for Superadmin User...');
     const existingAdmin = await User.findOne({ where: { email: adminEmail } });
 
     if (!existingAdmin) {
-      // Hash the password just like we do in the register controller
+      // Hash the password just like the registration controller
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(adminPassword, salt);
 
@@ -62,13 +66,12 @@ const seedDatabase = async () => {
       console.log('⚠️ Superadmin user already exists. Skipping creation.');
     }
 
-    console.log('🎉 Database seeding completed successfully!');
-    process.exit(0); // Exit the script successfully
+    console.log('--- 🎉 Seeding Process Complete ---');
+    process.exit(0); 
   } catch (error) {
     console.error('❌ Error seeding database:', error);
-    process.exit(1); // Exit with failure
+    process.exit(1); 
   }
 };
 
-// Run the function
 seedDatabase();

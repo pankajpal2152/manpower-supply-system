@@ -26,15 +26,25 @@ exports.getAllPermissions = async (req, res) => {
 exports.updateRolePermissions = async (req, res) => {
   try {
     const { roleId } = req.params;
-    const { permissionIds } = req.body; // Array of IDs, e.g., [1, 3, 4, 7]
+    const { permissionIds } = req.body; 
 
-    // 1. Find the role
+    // 1. Backend Validation: Ensure permissionIds is actually an array before proceeding
+    if (!permissionIds || !Array.isArray(permissionIds)) {
+      return res.status(400).json({ message: 'Invalid data format. Expected an array of permission IDs.' });
+    }
+
+    // 2. Find the role
     const role = await Role.findByPk(roleId);
     if (!role) {
       return res.status(404).json({ message: 'Role not found.' });
     }
 
-    // 2. Magic Sequelize Method: setPermissions
+    // Optional Safety Net: Prevent locking out the Superadmin
+    // if (role.name === 'Superadmin') {
+    //   return res.status(403).json({ message: 'Cannot modify core Superadmin permissions.' });
+    // }
+
+    // 3. Magic Sequelize Method: setPermissions
     // This automatically removes old unchecked permissions and adds new checked ones!
     await role.setPermissions(permissionIds);
 
@@ -60,10 +70,11 @@ exports.getRolePermissions = async (req, res) => {
       return res.status(404).json({ message: 'Role not found.' });
     }
 
+    // Send back just the permissions array attached to this role
     res.status(200).json(role.Permissions);
   } catch (error) {
     console.error('Error fetching role permissions:', error);
-    res.status(500).json({ message: 'Server error.' });
+    res.status(500).json({ message: 'Server error fetching role permissions.' });
   }
 };
 

@@ -3,15 +3,26 @@ import Sidebar from './Sidebar';
 
 const Layout = () => {
   const navigate = useNavigate();
-  // Get the logged-in user
+  
+  // 1. Get the logged-in user with a safety net for corrupted data
   const userString = localStorage.getItem('user');
-  const user = userString ? JSON.parse(userString) : null;
+  let user = null;
+  
+  try {
+    user = userString ? JSON.parse(userString) : null;
+  } catch (error) {
+    console.error("Error parsing user data. Clearing corrupted local storage.");
+    // If the data is corrupted, clear it out to prevent app crashes
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+  }
 
-  // If no user is logged in, kick them back to the login page securely!
+  // 2. If no user is logged in (or parsing failed), kick them back to the login page securely!
   if (!user) {
     return <Navigate to="/login" replace />;
   }
 
+  // 3. Handle the logout process
   const handleLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -38,10 +49,19 @@ const Layout = () => {
           boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-            <span style={{ fontWeight: 'bold' }}>{user.firstName} {user.lastName} ({user.role})</span>
+            <span style={{ fontWeight: 'bold' }}>
+              {user.firstName} {user.lastName} ({user.role})
+            </span>
             <button 
               onClick={handleLogout}
-              style={{ padding: '8px 15px', backgroundColor: '#ef4444', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+              style={{ 
+                padding: '8px 15px', 
+                backgroundColor: '#ef4444', 
+                color: 'white', 
+                border: 'none', 
+                borderRadius: '4px', 
+                cursor: 'pointer' 
+              }}
             >
               Logout
             </button>

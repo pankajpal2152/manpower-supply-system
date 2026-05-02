@@ -1,31 +1,36 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-// const { User, Role } = require('../models');
 const { User, Role, Permission } = require('../models');
 
 // --- REGISTER A NEW USER ---
 exports.register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password } = req.body;
+    // 1. Extract all fields, including the 'role' sent from our React frontend!
+    const { role: requestedRoleName, firstName, lastName, email, password } = req.body;
 
-    // 1. Check if user already exists
+    // Basic Validation
+    if (!firstName || !lastName || !email || !password || !requestedRoleName) {
+        return res.status(400).json({ message: 'All fields are required, including role.' });
+    }
+
+    // 2. Check if user already exists
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists with this email.' });
     }
 
-    // 2. Hash the password
+    // 3. Hash the password securely
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 3. For now, let's automatically create a 'Superadmin' role if it doesn't exist
-    // (Later, we will seed roles properly, but this helps us get started testing)
+    // 4. Find the specific role requested by the frontend, or create it if it doesn't exist yet
+    // (This is a great approach for quickly bootstrapping a new database)
     let [role] = await Role.findOrCreate({
-      where: { name: 'Superadmin' },
-      defaults: { description: 'Has access to everything' }
+      where: { name: requestedRoleName },
+      defaults: { description: `Standard access for ${requestedRoleName}` }
     });
 
-    // 4. Create the new user
+    // 5. Create the new user and link them to the role
     const newUser = await User.create({
       firstName,
       lastName,
@@ -37,7 +42,11 @@ exports.register = async (req, res) => {
     res.status(201).json({ message: 'User registered successfully!', userId: newUser.id });
   } catch (error) {
     console.error('Registration Error:', error);
-    res.status(500).json({ message: 'Server error during registration.' });
+    // Change this line to see the actual database or logic error in your browser
+    res.status(500).json({ 
+      message: 'Server error during registration.', 
+      error: error.message 
+    });
   }
 };
 
@@ -46,15 +55,21 @@ exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Basic validation
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required.' });
+    }
+
     // 1. Find user, include Role, AND include Permissions!
     const user = await User.findOne({ 
         where: { email },
         include: [{ 
           model: Role,
-          include: [{ model: Permission, through: { attributes: [] } }] // Include permissions!
+          include: [{ model: Permission, through: { attributes: [] } }] // Include permissions without junction table clutter
         }] 
     });
 
+    // 2. Verify existence and password
     if (!user) {
       return res.status(404).json({ message: 'User not found.' });
     }
@@ -64,15 +79,20 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials.' });
     }
 
-    // Extract just the permission names into a simple array (e.g., ['VIEW_DASHBOARD', 'MANAGE_EMPLOYEES'])
-    const userPermissions = user.Role.Permissions.map(perm => perm.name);
+    // 3. Safely extract just the permission names into a simple array
+    // Adding safety checks just in case the Role or Permissions array is missing
+    const userPermissions = (user.Role && user.Role.Permissions) 
+        ? user.Role.Permissions.map(perm => perm.name) 
+        : [];
 
+    // 4. Generate the JSON Web Token
     const token = jwt.sign(
-      { id: user.id, role: user.Role.name }, 
+      { id: user.id, role: user.Role ? user.Role.name : 'Unassigned' }, 
       process.env.JWT_SECRET, 
-      { expiresIn: '1d' }
+      { expiresIn: '1d' } // Token expires in 1 day
     );
 
+    // 5. Send back everything the frontend needs
     res.status(200).json({
       message: 'Login successful!',
       token,
@@ -81,8 +101,8 @@ exports.login = async (req, res) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        role: user.Role.name,
-        permissions: userPermissions // <-- Send permissions to frontend!
+        role: user.Role ? user.Role.name : 'Unassigned',
+        permissions: userPermissions // <-- Securely powers our frontend Sidebar filtering!
       }
     });
 

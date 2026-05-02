@@ -2,13 +2,35 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const Employee = sequelize.define('Employee', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-  firstName: { type: DataTypes.STRING, allowNull: false },
-  middleName: { type: DataTypes.STRING, allowNull: true },
-  lastName: { type: DataTypes.STRING, allowNull: false },
+  id: { 
+    type: DataTypes.INTEGER, 
+    primaryKey: true, 
+    autoIncrement: true 
+  },
+  firstName: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    validate: { notEmpty: true } // Ensures the string isn't just empty spaces
+  },
+  middleName: { 
+    type: DataTypes.STRING, 
+    allowNull: true 
+  },
+  lastName: { 
+    type: DataTypes.STRING, 
+    allowNull: false,
+    validate: { notEmpty: true }
+  },
   fathersName: { type: DataTypes.STRING, allowNull: true },
   mothersName: { type: DataTypes.STRING, allowNull: true },
-  email: { type: DataTypes.STRING, allowNull: false, unique: true },
+  email: { 
+    type: DataTypes.STRING, 
+    allowNull: false, 
+    unique: true,
+    validate: { 
+      isEmail: true // Built-in Sequelize validation for standard email formats
+    } 
+  },
   phoneNo: { type: DataTypes.STRING, allowNull: true },
   
   // Address Fields
@@ -28,13 +50,20 @@ const Employee = sequelize.define('Employee', {
   accountNo: { type: DataTypes.STRING, allowNull: true },
   bankAddress: { type: DataTypes.STRING, allowNull: true },
 
-  // System Fields (Keeping these from earlier so the table doesn't break)
+  // System Fields
   department: { type: DataTypes.STRING, defaultValue: 'Unassigned' },
   position: { type: DataTypes.STRING, defaultValue: 'Employee' },
-  status: { type: DataTypes.ENUM('Available', 'Assigned', 'On Leave', 'Terminated'), defaultValue: 'Available' },
-  baseSalary: { type: DataTypes.DECIMAL(10, 2), defaultValue: 0.00 }
+  status: { 
+    type: DataTypes.ENUM('Available', 'Assigned', 'On Leave', 'Terminated'), 
+    defaultValue: 'Available' 
+  },
+  baseSalary: { 
+    type: DataTypes.DECIMAL(10, 2), 
+    defaultValue: 0.00 
+  }
 }, {
-  timestamps: true,
+  tableName: 'employees', // Explicitly naming the table prevents Sequelize pluralization surprises
+  timestamps: true,       // Automatically adds createdAt and updatedAt columns
 });
 
 module.exports = Employee;

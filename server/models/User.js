@@ -5,33 +5,38 @@ const User = sequelize.define('User', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true,
+    autoIncrement: true
   },
   firstName: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: false
   },
   lastName: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: false
   },
   email: {
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
-    validate: {
-      isEmail: true, // Ensures the string is a valid email format
-    }
+    validate: { isEmail: true }
   },
   password: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: false
   },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: true, // Easily disable users without deleting them
+  // We explicitly define roleId here so we can easily reference it, 
+  // even though Sequelize also builds it via the association.
+  roleId: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'roles', // references the 'roles' table
+      key: 'id'
+    }
   }
 }, {
+  tableName: 'users',
   timestamps: true,
 });
 

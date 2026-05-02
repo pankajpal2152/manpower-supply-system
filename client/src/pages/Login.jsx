@@ -6,7 +6,6 @@ const styles = {
     container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f5f5f9', fontFamily: '"Public Sans", sans-serif', position: 'relative', overflow: 'hidden', padding: '20px' },
     card: { backgroundColor: '#ffffff', borderRadius: '8px', boxShadow: '0 2px 6px 0 rgba(67, 89, 113, 0.12)', padding: '40px', width: '100%', maxWidth: '400px', zIndex: 1 },
     logoContainer: { display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '24px', gap: '8px' },
-    logoImage: { maxHeight: '60px', objectFit: 'contain' },
     welcomeText: { fontSize: '1.25rem', fontWeight: '500', color: '#566a7f', marginBottom: '8px', marginTop: 0 },
     subText: { fontSize: '0.9375rem', color: '#697a8d', marginBottom: '24px', lineHeight: '1.5' },
     formGroup: { marginBottom: '16px' },
@@ -20,13 +19,14 @@ const styles = {
     checkbox: { width: '16px', height: '16px', cursor: 'pointer' },
     checkboxLabel: { fontSize: '0.9375rem', color: '#697a8d', cursor: 'pointer' },
     submitBtn: { width: '100%', backgroundColor: '#696cff', color: '#fff', border: 'none', borderRadius: '6px', padding: '10px 20px', fontSize: '0.9375rem', fontWeight: '500', cursor: 'pointer', transition: 'background-color 0.2s', marginBottom: '16px' },
+    submitBtnDisabled: { width: '100%', backgroundColor: '#a1acb8', color: '#fff', border: 'none', borderRadius: '6px', padding: '10px 20px', fontSize: '0.9375rem', fontWeight: '500', cursor: 'not-allowed', marginBottom: '16px' },
     footerText: { textAlign: 'center', fontSize: '0.9375rem', color: '#697a8d', margin: 0 },
     footerLink: { color: '#696cff', textDecoration: 'none', cursor: 'pointer', fontWeight: '600' },
     errorText: { color: '#dc3545', fontSize: '0.875rem', marginBottom: '15px', textAlign: 'center', backgroundColor: '#f8d7da', padding: '8px', borderRadius: '4px' },
     successText: { color: '#198754', fontSize: '0.875rem', marginBottom: '15px', textAlign: 'center', backgroundColor: '#d1e7dd', padding: '8px', borderRadius: '4px' }
 };
 
-// Hardcoded roles for the public registration page (Superadmin manages deep permissions later)
+// Hardcoded roles for the public registration page
 const availableRoles = ['Superadmin', 'HR Admin', 'Employee', 'Client'];
 
 // ==========================================
@@ -36,6 +36,7 @@ const LoginForm = ({ onToggleView }) => {
     const navigate = useNavigate();
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const [credentials, setCredentials] = useState({ role: '', email: '', password: '' });
 
     const handleChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -48,6 +49,8 @@ const LoginForm = ({ onToggleView }) => {
             setError('Please fill in all required fields.');
             return;
         }
+
+        setIsLoading(true);
 
         try {
             // Send login request to our backend API
@@ -65,13 +68,13 @@ const LoginForm = ({ onToggleView }) => {
         } catch (err) {
             console.error("Login failed:", err);
             setError(err.response?.data?.message || 'Invalid credentials. Please try again.');
+            setIsLoading(false);
         }
     };
 
     return (
         <div style={styles.card}>
             <div style={styles.logoContainer}>
-                {/* App Name acting as logo */}
                 <h2 style={{ color: '#696cff', fontWeight: 'bold', margin: 0 }}>ManpowerApp</h2>
             </div>
             <h3 style={styles.welcomeText}>Welcome! 👋</h3>
@@ -90,6 +93,7 @@ const LoginForm = ({ onToggleView }) => {
                         style={{ ...styles.input, cursor: 'pointer' }}
                         value={credentials.role}
                         onChange={handleChange}
+                        disabled={isLoading}
                     >
                         <option value="" disabled>Select your role...</option>
                         {availableRoles.map((r, i) => (
@@ -102,7 +106,7 @@ const LoginForm = ({ onToggleView }) => {
                     <div style={styles.labelContainer}>
                         <label htmlFor="email" style={styles.label}>Email Address</label>
                     </div>
-                    <input type="email" id="email" name="email" placeholder="admin@manpower.com" style={styles.input} value={credentials.email} onChange={handleChange} autoFocus required />
+                    <input type="email" id="email" name="email" placeholder="admin@manpower.com" style={styles.input} value={credentials.email} onChange={handleChange} autoFocus required disabled={isLoading} />
                 </div>
 
                 <div style={styles.formGroup}>
@@ -110,18 +114,20 @@ const LoginForm = ({ onToggleView }) => {
                         <label htmlFor="password" style={styles.label}>Password</label>
                     </div>
                     <div style={styles.passwordContainer}>
-                        <input type={showPassword ? "text" : "password"} id="password" name="password" placeholder="············" style={styles.input} value={credentials.password} onChange={handleChange} required />
-                        <button type="button" style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>
+                        <input type={showPassword ? "text" : "password"} id="password" name="password" placeholder="············" style={styles.input} value={credentials.password} onChange={handleChange} required disabled={isLoading} />
+                        <button type="button" style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)} disabled={isLoading}>
                             {showPassword ? "HIDE" : "SHOW"}
                         </button>
                     </div>
                 </div>
 
-                <button type="submit" style={styles.submitBtn}>Sign in</button>
+                <button type="submit" style={isLoading ? styles.submitBtnDisabled : styles.submitBtn} disabled={isLoading}>
+                    {isLoading ? 'Signing in...' : 'Sign in'}
+                </button>
             </form>
 
             <p style={styles.footerText}>
-                New on our platform? <span onClick={onToggleView} style={styles.footerLink}>Create an account</span>
+                New on our platform? <span onClick={isLoading ? null : onToggleView} style={styles.footerLink}>Create an account</span>
             </p>
         </div>
     );
@@ -134,8 +140,8 @@ const SignupForm = ({ onToggleView }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     
-    // Splitting username into firstName and lastName to exactly match our database model!
     const [credentials, setCredentials] = useState({
         role: '', firstName: '', lastName: '', email: '', password: ''
     });
@@ -147,14 +153,17 @@ const SignupForm = ({ onToggleView }) => {
         setError('');
         setSuccess('');
 
-        if (!credentials.firstName || !credentials.lastName || !credentials.email || !credentials.password) {
-            setError('Please fill in all fields.');
+        if (!credentials.firstName || !credentials.lastName || !credentials.email || !credentials.password || !credentials.role) {
+            setError('Please fill in all fields, including your role.');
             return;
         }
 
+        setIsLoading(true);
+
         try {
-            // Send registration request to our backend API
+            // BUG FIX: Added 'role' to the payload being sent to the backend
             await api.post('/auth/register', {
+                role: credentials.role, 
                 firstName: credentials.firstName,
                 lastName: credentials.lastName,
                 email: credentials.email,
@@ -169,6 +178,7 @@ const SignupForm = ({ onToggleView }) => {
         } catch (err) {
             console.error("Signup failed:", err);
             setError(err.response?.data?.message || 'Error creating account.');
+            setIsLoading(false);
         }
     };
 
@@ -193,6 +203,8 @@ const SignupForm = ({ onToggleView }) => {
                         style={{ ...styles.input, marginTop: '8px', cursor: 'pointer' }}
                         value={credentials.role}
                         onChange={handleChange}
+                        disabled={isLoading}
+                        required
                     >
                         <option value="" disabled>Select your role...</option>
                         {availableRoles.map((r, i) => (
@@ -201,45 +213,46 @@ const SignupForm = ({ onToggleView }) => {
                     </select>
                 </div>
 
-                {/* Using a split layout for First/Last name to match DB requirements */}
                 <div style={{ display: 'flex', gap: '10px' }}>
                     <div style={{ ...styles.formGroup, flex: 1 }}>
                         <label htmlFor="firstName" style={styles.label}>First Name</label>
-                        <input type="text" id="firstName" name="firstName" placeholder="John" style={{ ...styles.input, marginTop: '8px' }} value={credentials.firstName} onChange={handleChange} required />
+                        <input type="text" id="firstName" name="firstName" placeholder="John" style={{ ...styles.input, marginTop: '8px' }} value={credentials.firstName} onChange={handleChange} required disabled={isLoading} />
                     </div>
                     <div style={{ ...styles.formGroup, flex: 1 }}>
                         <label htmlFor="lastName" style={styles.label}>Last Name</label>
-                        <input type="text" id="lastName" name="lastName" placeholder="Doe" style={{ ...styles.input, marginTop: '8px' }} value={credentials.lastName} onChange={handleChange} required />
+                        <input type="text" id="lastName" name="lastName" placeholder="Doe" style={{ ...styles.input, marginTop: '8px' }} value={credentials.lastName} onChange={handleChange} required disabled={isLoading} />
                     </div>
                 </div>
 
                 <div style={styles.formGroup}>
                     <label htmlFor="email" style={styles.label}>Email</label>
-                    <input type="email" id="email" name="email" placeholder="Enter your email" style={{ ...styles.input, marginTop: '8px' }} value={credentials.email} onChange={handleChange} required />
+                    <input type="email" id="email" name="email" placeholder="Enter your email" style={{ ...styles.input, marginTop: '8px' }} value={credentials.email} onChange={handleChange} required disabled={isLoading} />
                 </div>
 
                 <div style={styles.formGroup}>
                     <label htmlFor="password" style={styles.label}>Password</label>
                     <div style={{ ...styles.passwordContainer, marginTop: '8px' }}>
-                        <input type={showPassword ? "text" : "password"} id="password" name="password" placeholder="············" style={styles.input} value={credentials.password} onChange={handleChange} required />
-                        <button type="button" style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)}>
+                        <input type={showPassword ? "text" : "password"} id="password" name="password" placeholder="············" style={styles.input} value={credentials.password} onChange={handleChange} required disabled={isLoading} />
+                        <button type="button" style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)} disabled={isLoading}>
                             {showPassword ? "HIDE" : "SHOW"}
                         </button>
                     </div>
                 </div>
 
                 <div style={styles.checkboxContainer}>
-                    <input type="checkbox" id="terms" style={styles.checkbox} required />
+                    <input type="checkbox" id="terms" style={styles.checkbox} required disabled={isLoading} />
                     <label htmlFor="terms" style={styles.checkboxLabel}>
                         I agree to <span style={styles.linkText}>privacy policy & terms</span>
                     </label>
                 </div>
 
-                <button type="submit" style={styles.submitBtn}>Sign up</button>
+                <button type="submit" style={isLoading ? styles.submitBtnDisabled : styles.submitBtn} disabled={isLoading}>
+                    {isLoading ? 'Creating Account...' : 'Sign up'}
+                </button>
             </form>
 
             <p style={styles.footerText}>
-                Already have an account? <span onClick={onToggleView} style={styles.footerLink}>Sign in instead</span>
+                Already have an account? <span onClick={isLoading ? null : onToggleView} style={styles.footerLink}>Sign in instead</span>
             </p>
         </div>
     );
