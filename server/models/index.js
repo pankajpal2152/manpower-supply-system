@@ -1,38 +1,40 @@
-// 1. Import the database connection and the sequelize instance
 const { sequelize, connectDB } = require('../config/database');
 
-// 2. Import all your models
+// 1. Import all models
 const User = require('./User');
 const Role = require('./Role');
 const Permission = require('./Permission');
 const Employee = require('./Employee'); 
+const EmployeeOffice = require('./EmployeeOffice'); 
+const EmployeeStatutory = require('./EmployeeStatutory'); 
+const EmployeeFamily = require('./EmployeeFamily'); 
 
-// ==========================================
-// DEFINE RELATIONSHIPS (ASSOCIATIONS)
-// ==========================================
-
-// One-to-Many: A Role has many Users
+// 2. Define User Roles Relationships
 Role.hasMany(User, { foreignKey: 'roleId' });
 User.belongsTo(Role, { foreignKey: 'roleId' });
 
-// Many-to-Many: Roles and Permissions
-Role.belongsToMany(Permission, { 
-  through: 'RolePermissions', 
-  foreignKey: 'roleId' 
-});
-Permission.belongsToMany(Role, { 
-  through: 'RolePermissions', 
-  foreignKey: 'permissionId' 
-});
+Role.belongsToMany(Permission, { through: 'RolePermissions', foreignKey: 'roleId' });
+Permission.belongsToMany(Role, { through: 'RolePermissions', foreignKey: 'permissionId' });
 
-// ==========================================
-// EXPORT EVERYTHING
-// ==========================================
+// 3. Define Employee Sub-Table Relationships (One-to-One)
+Employee.hasOne(EmployeeOffice, { foreignKey: 'employeeId', as: 'officeInfo', onDelete: 'CASCADE' });
+EmployeeOffice.belongsTo(Employee, { foreignKey: 'employeeId' });
+
+Employee.hasOne(EmployeeStatutory, { foreignKey: 'employeeId', as: 'statutoryInfo', onDelete: 'CASCADE' });
+EmployeeStatutory.belongsTo(Employee, { foreignKey: 'employeeId' });
+
+Employee.hasOne(EmployeeFamily, { foreignKey: 'employeeId', as: 'familyInfo', onDelete: 'CASCADE' });
+EmployeeFamily.belongsTo(Employee, { foreignKey: 'employeeId' });
+
+// Export everything
 module.exports = {
   sequelize,
-  connectDB, // Now this is defined because we imported it at the top!
+  connectDB,
   User,
   Role,
   Permission,
-  Employee 
+  Employee,
+  EmployeeOffice,
+  EmployeeStatutory,
+  EmployeeFamily
 };

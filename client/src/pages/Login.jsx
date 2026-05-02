@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api/axios'; // Using our configured Axios instance
+import api from '../api/axios'; 
 
 const styles = {
     container: { display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh', backgroundColor: '#f5f5f9', fontFamily: '"Public Sans", sans-serif', position: 'relative', overflow: 'hidden', padding: '20px' },
@@ -26,7 +26,6 @@ const styles = {
     successText: { color: '#198754', fontSize: '0.875rem', marginBottom: '15px', textAlign: 'center', backgroundColor: '#d1e7dd', padding: '8px', borderRadius: '4px' }
 };
 
-// Hardcoded roles for the public registration page
 const availableRoles = ['Superadmin', 'HR Admin', 'Employee', 'Client'];
 
 // ==========================================
@@ -37,7 +36,8 @@ const LoginForm = ({ onToggleView }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [credentials, setCredentials] = useState({ role: '', email: '', password: '' });
+    // Updated to use role, username, and password
+    const [credentials, setCredentials] = useState({ role: '', username: '', password: '' });
 
     const handleChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
 
@@ -45,7 +45,7 @@ const LoginForm = ({ onToggleView }) => {
         e.preventDefault();
         setError('');
 
-        if (!credentials.email || !credentials.password) {
+        if (!credentials.role || !credentials.username || !credentials.password) {
             setError('Please fill in all required fields.');
             return;
         }
@@ -53,17 +53,15 @@ const LoginForm = ({ onToggleView }) => {
         setIsLoading(true);
 
         try {
-            // Send login request to our backend API
             const response = await api.post('/auth/login', { 
-                email: credentials.email, 
+                role: credentials.role,
+                username: credentials.username, 
                 password: credentials.password 
             });
 
-            // Save the JWT token and User data securely to localStorage
             localStorage.setItem('token', response.data.token);
             localStorage.setItem('user', JSON.stringify(response.data.user));
             
-            // Redirect to the secure dashboard
             navigate('/dashboard');
         } catch (err) {
             console.error("Login failed:", err);
@@ -77,23 +75,22 @@ const LoginForm = ({ onToggleView }) => {
             <div style={styles.logoContainer}>
                 <h2 style={{ color: '#696cff', fontWeight: 'bold', margin: 0 }}>ManpowerApp</h2>
             </div>
-            <h3 style={styles.welcomeText}>Welcome! 👋</h3>
+            <h3 style={styles.welcomeText}>Welcome Back! 👋</h3>
             <p style={styles.subText}>Please sign in to your account to continue.</p>
 
             {error && <div style={styles.errorText}>{error}</div>}
 
             <form onSubmit={handleSubmit}>
                 <div style={styles.formGroup}>
-                    <div style={styles.labelContainer}>
-                        <label htmlFor="role" style={styles.label}>Select Role (Optional)</label>
-                    </div>
+                    <label htmlFor="role" style={styles.label}>Select Role</label>
                     <select
                         id="role"
                         name="role"
-                        style={{ ...styles.input, cursor: 'pointer' }}
+                        style={{ ...styles.input, marginTop: '8px', cursor: 'pointer' }}
                         value={credentials.role}
                         onChange={handleChange}
                         disabled={isLoading}
+                        required
                     >
                         <option value="" disabled>Select your role...</option>
                         {availableRoles.map((r, i) => (
@@ -103,17 +100,13 @@ const LoginForm = ({ onToggleView }) => {
                 </div>
 
                 <div style={styles.formGroup}>
-                    <div style={styles.labelContainer}>
-                        <label htmlFor="email" style={styles.label}>Email Address</label>
-                    </div>
-                    <input type="email" id="email" name="email" placeholder="admin@manpower.com" style={styles.input} value={credentials.email} onChange={handleChange} autoFocus required disabled={isLoading} />
+                    <label htmlFor="username" style={styles.label}>Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username" style={{ ...styles.input, marginTop: '8px' }} value={credentials.username} onChange={handleChange} required disabled={isLoading} />
                 </div>
 
                 <div style={styles.formGroup}>
-                    <div style={styles.labelContainer}>
-                        <label htmlFor="password" style={styles.label}>Password</label>
-                    </div>
-                    <div style={styles.passwordContainer}>
+                    <label htmlFor="password" style={styles.label}>Password</label>
+                    <div style={{ ...styles.passwordContainer, marginTop: '8px' }}>
                         <input type={showPassword ? "text" : "password"} id="password" name="password" placeholder="············" style={styles.input} value={credentials.password} onChange={handleChange} required disabled={isLoading} />
                         <button type="button" style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)} disabled={isLoading}>
                             {showPassword ? "HIDE" : "SHOW"}
@@ -142,8 +135,9 @@ const SignupForm = ({ onToggleView }) => {
     const [success, setSuccess] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     
+    // Updated state structure
     const [credentials, setCredentials] = useState({
-        role: '', firstName: '', lastName: '', email: '', password: ''
+        role: '', fullName: '', email: '', contactNo: '', username: '', password: ''
     });
 
     const handleChange = (e) => setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -153,26 +147,26 @@ const SignupForm = ({ onToggleView }) => {
         setError('');
         setSuccess('');
 
-        if (!credentials.firstName || !credentials.lastName || !credentials.email || !credentials.password || !credentials.role) {
-            setError('Please fill in all fields, including your role.');
+        if (!credentials.role || !credentials.fullName || !credentials.email || !credentials.contactNo || !credentials.username || !credentials.password) {
+            setError('Please fill in all fields.');
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // BUG FIX: Added 'role' to the payload being sent to the backend
             await api.post('/auth/register', {
                 role: credentials.role, 
-                firstName: credentials.firstName,
-                lastName: credentials.lastName,
+                fullName: credentials.fullName,
                 email: credentials.email,
+                contactNo: credentials.contactNo,
+                username: credentials.username,
                 password: credentials.password
             });
 
             setSuccess('Account created successfully! You can now log in.');
             setTimeout(() => {
-                onToggleView(); // Automatically switch back to login after 2 seconds
+                onToggleView(); 
             }, 2000);
             
         } catch (err) {
@@ -195,6 +189,7 @@ const SignupForm = ({ onToggleView }) => {
             {success && <div style={styles.successText}>{success}</div>}
 
             <form onSubmit={handleSubmit}>
+                {/* 1. Select Role */}
                 <div style={styles.formGroup}>
                     <label htmlFor="role" style={styles.label}>Select Role</label>
                     <select
@@ -213,24 +208,38 @@ const SignupForm = ({ onToggleView }) => {
                     </select>
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
-                    <div style={{ ...styles.formGroup, flex: 1 }}>
-                        <label htmlFor="firstName" style={styles.label}>First Name</label>
-                        <input type="text" id="firstName" name="firstName" placeholder="John" style={{ ...styles.input, marginTop: '8px' }} value={credentials.firstName} onChange={handleChange} required disabled={isLoading} />
-                    </div>
-                    <div style={{ ...styles.formGroup, flex: 1 }}>
-                        <label htmlFor="lastName" style={styles.label}>Last Name</label>
-                        <input type="text" id="lastName" name="lastName" placeholder="Doe" style={{ ...styles.input, marginTop: '8px' }} value={credentials.lastName} onChange={handleChange} required disabled={isLoading} />
-                    </div>
+                {/* 2. Full Name */}
+                <div style={styles.formGroup}>
+                    <label htmlFor="fullName" style={styles.label}>Full Name</label>
+                    <input type="text" id="fullName" name="fullName" placeholder="John Doe" style={{ ...styles.input, marginTop: '8px' }} value={credentials.fullName} onChange={handleChange} required disabled={isLoading} />
                 </div>
 
+                {/* 3. Mail ID */}
                 <div style={styles.formGroup}>
-                    <label htmlFor="email" style={styles.label}>Email</label>
+                    <label htmlFor="email" style={styles.label}>Mail ID</label>
                     <input type="email" id="email" name="email" placeholder="Enter your email" style={{ ...styles.input, marginTop: '8px' }} value={credentials.email} onChange={handleChange} required disabled={isLoading} />
                 </div>
 
+                {/* 4. Contact No */}
                 <div style={styles.formGroup}>
-                    <label htmlFor="password" style={styles.label}>Password</label>
+                    <label htmlFor="contactNo" style={styles.label}>Contact No</label>
+                    <input type="tel" id="contactNo" name="contactNo" placeholder="Enter your phone number" style={{ ...styles.input, marginTop: '8px' }} value={credentials.contactNo} onChange={handleChange} required disabled={isLoading} />
+                </div>
+
+                {/* 5. Signup Username */}
+                <div style={styles.formGroup}>
+                    <label htmlFor="username" style={styles.label}>Signup Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose a username" style={{ ...styles.input, marginTop: '8px' }} value={credentials.username} onChange={handleChange} required disabled={isLoading} />
+                </div>
+
+                {/* 6. Signup Password */}
+                <div style={styles.formGroup}>
+                    <label htmlFor="password" style={styles.label}>
+                        Signup Password 
+                        <span style={{ color: 'red', textTransform: 'none', fontWeight: 'normal', marginLeft: '5px' }}>
+                            (please remember don't forget it)
+                        </span>
+                    </label>
                     <div style={{ ...styles.passwordContainer, marginTop: '8px' }}>
                         <input type={showPassword ? "text" : "password"} id="password" name="password" placeholder="············" style={styles.input} value={credentials.password} onChange={handleChange} required disabled={isLoading} />
                         <button type="button" style={styles.eyeIcon} onClick={() => setShowPassword(!showPassword)} disabled={isLoading}>

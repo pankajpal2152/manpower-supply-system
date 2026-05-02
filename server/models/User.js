@@ -7,11 +7,7 @@ const User = sequelize.define('User', {
     primaryKey: true,
     autoIncrement: true
   },
-  firstName: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  lastName: {
+  fullName: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -21,17 +17,30 @@ const User = sequelize.define('User', {
     unique: true,
     validate: { isEmail: true }
   },
+  contactNo: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  username: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true 
+  },
   password: {
     type: DataTypes.STRING,
     allowNull: false
   },
-  // We explicitly define roleId here so we can easily reference it, 
-  // even though Sequelize also builds it via the association.
+  // NEW COLUMN ADDED HERE
+  isActive: {
+    type: DataTypes.BOOLEAN,
+    allowNull: false,
+    defaultValue: true // 1 in the database, meaning new users are active by default
+  },
   roleId: {
     type: DataTypes.INTEGER,
     allowNull: true,
     references: {
-      model: 'roles', // references the 'roles' table
+      model: 'roles', 
       key: 'id'
     }
   }

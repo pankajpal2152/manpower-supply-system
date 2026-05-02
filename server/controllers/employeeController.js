@@ -1,86 +1,84 @@
-const { Employee } = require('../models');
+const { Employee, EmployeeOffice, EmployeeStatutory, EmployeeFamily } = require('../models');
 
-// --- GET ALL EMPLOYEES ---
+// Fetch ONLY active employees with ALL nested data
 exports.getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.findAll({
-      order: [['createdAt', 'DESC']] // Show newest first
+      where: { isActive: true },
+      include: [
+        { model: EmployeeOffice, as: 'officeInfo' },
+        { model: EmployeeStatutory, as: 'statutoryInfo' },
+        { model: EmployeeFamily, as: 'familyInfo' }
+      ],
+      order: [['createdAt', 'DESC']]
     });
-    res.status(200).json(employees);
+
+    // Flatten the nested objects so the frontend form receives flat data
+    const flattenedEmployees = employees.map(emp => {
+      const plainEmp = emp.get({ plain: true });
+      return {
+        ...plainEmp,
+        ...(plainEmp.officeInfo || {}),
+        ...(plainEmp.statutoryInfo || {}),
+        ...(plainEmp.familyInfo || {})
+      };
+    });
+
+    res.status(200).json(flattenedEmployees);
   } catch (error) {
-    console.error('Error fetching employees:', error);
-    res.status(500).json({ message: 'Server error fetching employees.' });
+    console.error('Fetch Error:', error);
+    res.status(500).json({ message: 'Error fetching employees', error: error.message });
   }
 };
 
-// --- CREATE NEW EMPLOYEE ---
+// Create a new employee across all 4 tables
 exports.createEmployee = async (req, res) => {
   try {
-    const { firstName, lastName, email } = req.body;
+    const data = req.body;
 
-    // 1. Backend Validation: Ensure critical fields aren't missing
-    if (!firstName || !lastName || !email) {
-      return res.status(400).json({ message: 'First name, last name, and email are required.' });
-    }
+    // 1. Create Core Employee
+    const newEmployee = await Employee.create(data);
 
-    // 2. Check if email already exists in the database
-    const existingEmployee = await Employee.findOne({ where: { email } });
-    if (existingEmployee) {
-      return res.status(400).json({ message: 'An employee with this email already exists.' });
-    }
+    // 2. Create nested records using the new employee's ID
+    await EmployeeOffice.create({ ...data, employeeId: newEmployee.id });
+    await EmployeeStatutory.create({ ...data, employeeId: newEmployee.id });
+    await EmployeeFamily.create({ ...data, employeeId: newEmployee.id });
 
-    // 3. Create the employee
-    const newEmployee = await Employee.create(req.body);
-    res.status(201).json({ message: 'Employee created successfully!', employee: newEmployee });
+    res.status(201).json(newEmployee);
   } catch (error) {
-    console.error('Error creating employee:', error);
-    res.status(500).json({ message: 'Server error creating employee.' });
+    console.error('Create Error:', error);
+    res.status(500).json({ message: 'Error creating employee', error: error.message });
   }
 };
 
-// --- UPDATE EMPLOYEE ---
+// Update an employee across all 4 tables
 exports.updateEmployee = async (req, res) => {
   try {
     const { id } = req.params;
+    const data = req.body;
+
+    // Update Core
+    await Employee.update(data, { where: { id } });
     
-    // 1. Find the employee we want to update
-    const employee = await Employee.findByPk(id);
-    if (!employee) {
-      return res.status(404).json({ message: 'Employee not found.' });
-    }
+    // Update or Create sub-records
+    await EmployeeOffice.upsert({ ...data, employeeId: id }, { where: { employeeId: id } });
+    await EmployeeStatutory.upsert({ ...data, employeeId: id }, { where: { employeeId: id } });
+    await EmployeeFamily.upsert({ ...data, employeeId: id }, { where: { employeeId: id } });
 
-    // 2. Prevent Email Collisions: If they are updating their email, make sure no one else has it
-    if (req.body.email && req.body.email !== employee.email) {
-      const emailTaken = await Employee.findOne({ where: { email: req.body.email } });
-      // If we found a record with this email, and it's NOT the user we are currently updating...
-      if (emailTaken && emailTaken.id !== Number(id)) {
-        return res.status(400).json({ message: 'This email is already in use by another employee.' });
-      }
-    }
-
-    // 3. Apply the updates
-    await employee.update(req.body);
-    res.status(200).json({ message: 'Employee updated successfully!', employee });
+    res.status(200).json({ message: 'Employee updated successfully' });
   } catch (error) {
-    console.error('Error updating employee:', error);
-    res.status(500).json({ message: 'Server error updating employee.' });
+    console.error('Update Error:', error);
+    res.status(500).json({ message: 'Error updating employee', error: error.message });
   }
 };
 
-// --- DELETE EMPLOYEE ---
+// SOFT DELETE
 exports.deleteEmployee = async (req, res) => {
   try {
     const { id } = req.params;
-    
-    const employee = await Employee.findByPk(id);
-    if (!employee) {
-      return res.status(404).json({ message: 'Employee not found.' });
-    }
-
-    await employee.destroy();
-    res.status(200).json({ message: 'Employee deleted successfully!' });
+    await Employee.update({ isActive: false }, { where: { id } });
+    res.status(200).json({ message: 'Employee deleted successfully' });
   } catch (error) {
-    console.error('Error deleting employee:', error);
-    res.status(500).json({ message: 'Server error deleting employee.' });
+    res.status(500).json({ message: 'Error deleting employee', error: error.message });
   }
 };
