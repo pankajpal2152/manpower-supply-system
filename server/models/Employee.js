@@ -1,8 +1,10 @@
+// models/Employee.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const Employee = sequelize.define('Employee', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
+  profileImage: { type: DataTypes.STRING, allowNull: true }, // <-- NEW COLUMN
   firstName: { type: DataTypes.STRING, allowNull: false },
   middleName: { type: DataTypes.STRING, allowNull: true },
   lastName: { type: DataTypes.STRING, allowNull: false },

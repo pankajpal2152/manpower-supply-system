@@ -16,7 +16,13 @@ const app = express();
 
 // Middleware
 app.use(cors());
-app.use(express.json());
+
+// ==========================================
+// FIX: INCREASE PAYLOAD SIZE LIMITS
+// We increased the limit to 50mb to safely accommodate Base64 image strings
+// ==========================================
+app.use(express.json({ limit: '500mb' }));
+app.use(express.urlencoded({ limit: '500mb', extended: true }));
 
 // ==========================================
 // CENTRAL STARTUP FUNCTION

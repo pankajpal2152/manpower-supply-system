@@ -1,3 +1,4 @@
+// models/index.js
 const { sequelize, connectDB } = require('../config/database');
 
 // 1. Import all models
@@ -8,6 +9,7 @@ const Employee = require('./Employee');
 const EmployeeOffice = require('./EmployeeOffice'); 
 const EmployeeStatutory = require('./EmployeeStatutory'); 
 const EmployeeFamily = require('./EmployeeFamily'); 
+const Document = require('./Document'); // <-- NEW MODEL
 
 // 2. Define User Roles Relationships
 Role.hasMany(User, { foreignKey: 'roleId' });
@@ -26,6 +28,10 @@ EmployeeStatutory.belongsTo(Employee, { foreignKey: 'employeeId' });
 Employee.hasOne(EmployeeFamily, { foreignKey: 'employeeId', as: 'familyInfo', onDelete: 'CASCADE' });
 EmployeeFamily.belongsTo(Employee, { foreignKey: 'employeeId' });
 
+// 4. Define Document Relationships
+Employee.hasMany(Document, { foreignKey: 'employeeId', as: 'documents', onDelete: 'CASCADE' });
+Document.belongsTo(Employee, { foreignKey: 'employeeId' });
+
 // Export everything
 module.exports = {
   sequelize,
@@ -36,5 +42,6 @@ module.exports = {
   Employee,
   EmployeeOffice,
   EmployeeStatutory,
-  EmployeeFamily
+  EmployeeFamily,
+  Document // <-- Exported
 };
