@@ -30,12 +30,13 @@ const Layout = () => {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    // FIX: Added width, position, top, and left to completely fill the screen and ignore default body margins!
+    <div style={{ display: 'flex', height: '100vh', width: '100vw', position: 'absolute', top: 0, left: 0, overflow: 'hidden' }}>
       {/* Sidebar on the Left */}
       <Sidebar user={user} />
 
       {/* Main Content Area on the Right */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         
         {/* Top Header */}
         <header style={{ 
@@ -46,7 +47,8 @@ const Layout = () => {
           justifyContent: 'flex-end',
           alignItems: 'center',
           padding: '0 20px',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+          boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+          flexShrink: 0
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <span style={{ fontWeight: 'bold' }}>

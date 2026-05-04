@@ -35,7 +35,8 @@ function App() {
 
         {/* Catch-all 404 Route - Triggers if the user types an unknown URL */}
         <Route path="*" element={
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', backgroundColor: '#f1f5f9' }}>
+          // FIX: Applied the same absolute positioning here to fix layout breaks on the 404 page
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', width: '100vw', position: 'absolute', top: 0, left: 0, backgroundColor: '#f1f5f9' }}>
             <h1 style={{ fontSize: '3rem', color: '#0f172a', marginBottom: '10px' }}>404</h1>
             <p style={{ fontSize: '1.2rem', color: '#64748b', marginBottom: '20px' }}>Oops! The page you are looking for doesn't exist.</p>
             <a href="/dashboard" style={{ padding: '10px 20px', backgroundColor: '#0ea5e9', color: 'white', textDecoration: 'none', borderRadius: '5px', fontWeight: 'bold' }}>

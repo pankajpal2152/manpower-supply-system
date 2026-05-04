@@ -27,6 +27,8 @@ const Sidebar = ({ user }) => {
   return (
     <div style={{
       width: '250px',
+      minWidth: '250px', // FIX: Prevents the sidebar from squishing on smaller tablets
+      flexShrink: 0,     // FIX: Forces the sidebar to keep its structural size
       backgroundColor: '#1e293b',
       color: 'white',
       height: '100vh',
@@ -38,7 +40,8 @@ const Sidebar = ({ user }) => {
         Manpower System
       </h2>
       
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {/* Added overflowY: auto so if menu items get too long, they scroll nicely inside the sidebar */}
+      <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
         {visibleMenuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (

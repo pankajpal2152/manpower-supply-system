@@ -1174,558 +1174,556 @@ const EmployeeManagement = () => {
   return (
     <div className="container-fluid py-4" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
       
-      {/* HEADER SECTION */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 className="fw-bold mb-0 text-dark">Employee Management</h2>
-          <p className="text-muted mb-0">Enterprise HR & Payroll Configuration</p>
-        </div>
-        <button onClick={handleAddNew} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-          <Plus size={18} /> Add Employee
-        </button>
-      </div>
+      {!isModalOpen ? (
+        <>
+          {/* HEADER SECTION */}
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2 className="fw-bold mb-0 text-dark">Employee Management</h2>
+              <p className="text-muted mb-0">Enterprise HR & Payroll Configuration</p>
+            </div>
+            <button onClick={handleAddNew} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
+              <Plus size={18} /> Add Employee
+            </button>
+          </div>
 
-      {/* DATA TABLE */}
-      <div className="card shadow-sm border-0">
-        <div className="card-body p-0 table-responsive">
-          <table className="table table-hover align-middle mb-0">
-            <thead className="table-light text-uppercase" style={{ fontSize: '0.85rem' }}>
-              <tr>
-                <th className="py-3 ps-4">Name</th>
-                <th className="py-3">Department</th>
-                <th className="py-3">Phone</th>
-                <th className="py-3">Status</th>
-                <th className="py-3 text-end pe-4">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {employees.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center py-5 text-muted fw-bold">
-                    No active employees found.
-                  </td>
-                </tr>
-              ) : (
-                employees.map((emp) => (
-                  <tr key={emp.id}>
-                    <td className="ps-4 fw-bold text-dark">{emp.firstName} {emp.lastName}</td>
-                    <td className="text-muted">{emp.department || 'N/A'}</td>
-                    <td className="text-muted">{emp.phoneNo || 'N/A'}</td>
-                    <td>
-                      <span className={`badge ${emp.status === 'Available' ? 'bg-success' : 'bg-warning text-dark'}`}>
-                        {emp.status}
-                      </span>
-                    </td>
-                    <td className="text-end pe-4">
-                      <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary me-2">
-                        <Pencil size={14} className="me-1" /> Edit
-                      </button>
-                      <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger">
-                        <Trash2 size={14} className="me-1" /> Delete
-                      </button>
-                    </td>
+          {/* DATA TABLE */}
+          <div className="card shadow-sm border-0">
+            <div className="card-body p-0 table-responsive">
+              <table className="table table-hover align-middle mb-0">
+                <thead className="table-light text-uppercase" style={{ fontSize: '0.85rem' }}>
+                  <tr>
+                    <th className="py-3 ps-4">Name</th>
+                    <th className="py-3">Department</th>
+                    <th className="py-3">Phone</th>
+                    <th className="py-3">Status</th>
+                    <th className="py-3 text-end pe-4">Actions</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+                </thead>
+                <tbody>
+                  {employees.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" className="text-center py-5 text-muted fw-bold">
+                        No active employees found.
+                      </td>
+                    </tr>
+                  ) : (
+                    employees.map((emp) => (
+                      <tr key={emp.id}>
+                        <td className="ps-4 fw-bold text-dark">{emp.firstName} {emp.lastName}</td>
+                        <td className="text-muted">{emp.department || 'N/A'}</td>
+                        <td className="text-muted">{emp.phoneNo || 'N/A'}</td>
+                        <td>
+                          <span className={`badge ${emp.status === 'Available' ? 'bg-success' : 'bg-warning text-dark'}`}>
+                            {emp.status}
+                          </span>
+                        </td>
+                        <td className="text-end pe-4">
+                          <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary me-2">
+                            <Pencil size={14} className="me-1" /> Edit
+                          </button>
+                          <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger">
+                            <Trash2 size={14} className="me-1" /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      ) : (
+        /* IN-PAGE FORM VIEW (Replaces the Fullscreen Modal) */
+        <div className="card shadow-sm border-0 mb-4">
+          
+          {/* Form Header */}
+          <div className="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h5 className="mb-0 fw-bold">
+              {editingId ? 'Edit Employee Data' : 'Employee Registration Form'}
+            </h5>
+            <button type="button" className="btn-close btn-close-white" onClick={() => setIsModalOpen(false)} aria-label="Close"></button>
+          </div>
 
-      {/* FULL-SCREEN MODAL FORM */}
-      {isModalOpen && (
-        <div className="modal d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.6)', zIndex: 1050 }}>
-          <div className="modal-dialog modal-fullscreen">
-            <div className="modal-content">
-              
-              {/* Modal Header */}
-              <div className="modal-header bg-primary text-white py-3">
-                <h5 className="modal-title fw-bold">
-                  {editingId ? 'Edit Employee Data' : 'Employee Registration Form'}
-                </h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setIsModalOpen(false)} aria-label="Close"></button>
-              </div>
+          {/* Form Body */}
+          <div className="card-body bg-light p-4 p-md-5">
+            <div className="container bg-white p-4 shadow-sm rounded-3">
+              <form id="employeeForm" onSubmit={handleSubmit} className="row g-3">
+                
+                {/* --- 1. PERSONAL INFORMATION --- */}
+                <div className="col-12 mt-0">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Personal Information</h5>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">First Name *</label>
+                  <input type="text" className="form-control form-control-sm" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="First Name" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Middle Name</label>
+                  <input type="text" className="form-control form-control-sm" name="middleName" value={formData.middleName} onChange={handleChange} placeholder="Middle Name" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Last Name *</label>
+                  <input type="text" className="form-control form-control-sm" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Last Name" />
+                </div>
 
-              {/* Modal Body */}
-              <div className="modal-body bg-light p-4 p-md-5">
-                <div className="container bg-white p-4 shadow-sm rounded-3">
-                  <form id="employeeForm" onSubmit={handleSubmit} className="row g-3">
-                    
-                    {/* --- 1. PERSONAL INFORMATION --- */}
-                    <div className="col-12 mt-0">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Personal Information</h5>
-                    </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Father's Name</label>
+                  <input type="text" className="form-control form-control-sm" name="fathersName" value={formData.fathersName} onChange={handleChange} placeholder="Father's Name" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Mother's Name</label>
+                  <input type="text" className="form-control form-control-sm" name="mothersName" value={formData.mothersName} onChange={handleChange} placeholder="Mother's Name" />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Relation</label>
+                  <select name="relation" value={formData.relation} onChange={handleChange} className="form-select form-select-sm">
+                    <option value="Father">Father</option>
+                    <option value="Husband">Husband</option>
+                  </select>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Date of Birth</label>
+                  <input type="date" className="form-control form-control-sm" name="dob" value={formData.dob} onChange={handleChange} />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Gender</label>
+                  <select name="sex" value={formData.sex} onChange={handleChange} className="form-select form-select-sm">
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Marital Status</label>
+                  <select name="maritalStatus" value={formData.maritalStatus} onChange={handleChange} className="form-select form-select-sm">
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="col-md-8">
+                  <label className="form-label text-start d-block fw-semibold">Spouse Name</label>
+                  <input type="text" className="form-control form-control-sm" name="spouseName" value={formData.spouseName} onChange={handleChange} placeholder="Spouse Name" />
+                </div>
+
+
+                {/* --- 2. CONTACT & ADDRESS --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Contact & Address</h5>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Email Address *</label>
+                  <input type="email" className="form-control form-control-sm" name="email" value={formData.email} onChange={handleChange} required placeholder="Email Address" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Phone Number</label>
+                  <input type="text" className="form-control form-control-sm" name="phoneNo" value={formData.phoneNo} onChange={handleChange} placeholder="Phone Number" />
+                </div>
+
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">City</label>
+                  <input type="text" className="form-control form-control-sm" name="city" value={formData.city} onChange={handleChange} placeholder="City" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">State</label>
+                  <select name="state" value={formData.state} onChange={handleChange} className="form-select form-select-sm">
+                    <option value="">Choose...</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Maharashtra">Maharashtra</option>
+                    <option value="Karnataka">Karnataka</option>
+                    <option value="West Bengal">West Bengal</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">District</label>
+                  <input type="text" className="form-control form-control-sm" name="district" value={formData.district} onChange={handleChange} placeholder="District" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">Pincode</label>
+                  <input type="text" className="form-control form-control-sm" name="pinCode" value={formData.pinCode} onChange={handleChange} placeholder="Pincode" />
+                </div>
+
+                <div className="col-12">
+                  <label className="form-label text-start d-block fw-semibold">Local Address</label>
+                  <textarea className="form-control form-control-sm" name="localAddress" value={formData.localAddress} onChange={handleChange} rows="2" placeholder="Local Address" />
+                </div>
+                <div className="col-12">
+                  <label className="form-label text-start d-block fw-semibold">Permanent Address</label>
+                  <textarea className="form-control form-control-sm" name="permanentAddress" value={formData.permanentAddress} onChange={handleChange} rows="2" placeholder="Permanent Address" />
+                </div>
+
+
+                {/* --- 3. ORGANIZATIONAL HIERARCHY --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Organizational Hierarchy</h5>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Organization Name</label>
+                  <input type="text" className="form-control form-control-sm" name="organizationName" value={formData.organizationName} onChange={handleChange} placeholder="Organization Name" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Site Name</label>
+                  <input type="text" className="form-control form-control-sm" name="siteName" value={formData.siteName} onChange={handleChange} placeholder="Site Name" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Department</label>
+                  <input type="text" className="form-control form-control-sm" name="department" value={formData.department} onChange={handleChange} placeholder="Department" />
+                </div>
+
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">Job Designation (Rank)</label>
+                  <select name="rank" value={formData.rank} onChange={handleChange} className="form-select form-select-sm">
+                    <option value="">Select Designation...</option>
+                    <option value="ARM GUARD">ARM GUARD</option>
+                    <option value="GUARD">GUARD</option>
+                    <option value="KST">KST</option>
+                    <option value="SG">SG</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">Status</label>
+                  <select name="status" value={formData.status} onChange={handleChange} className="form-select form-select-sm">
+                    <option value="Available">Available</option>
+                    <option value="Assigned">Assigned</option>
+                    <option value="On Leave">On Leave</option>
+                  </select>
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">Date of Join (DOJ)</label>
+                  <input type="date" className="form-control form-control-sm" name="doj" value={formData.doj} onChange={handleChange} />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">TKT No</label>
+                  <input type="text" className="form-control form-control-sm" name="tktNo" value={formData.tktNo} onChange={handleChange} placeholder="TKT No" />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Reporting Officer Name</label>
+                  <input type="text" className="form-control form-control-sm" name="officerName" value={formData.officerName} onChange={handleChange} placeholder="Officer Name" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Officer Contact No.</label>
+                  <input type="text" className="form-control form-control-sm" name="officerNo" value={formData.officerNo} onChange={handleChange} placeholder="Officer Contact No" />
+                </div>
+
+
+                {/* --- OFFICE DETAILS --- */}
+                <div className="col-12 mt-4">
+                  <h6 className="text-secondary fw-bold">Office Details</h6>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Office Name</label>
+                  <input type="text" className="form-control form-control-sm" name="officeName" value={formData.officeName} onChange={handleChange} placeholder="Office Name" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Reg Location</label>
+                  <input type="text" className="form-control form-control-sm" name="officeRegLocation" value={formData.officeRegLocation} onChange={handleChange} placeholder="Reg Location" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Working Addr.</label>
+                  <input type="text" className="form-control form-control-sm" name="officeWorkingAddress" value={formData.officeWorkingAddress} onChange={handleChange} placeholder="Working Address" />
+                </div>
+                
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">Reg No</label>
+                  <input type="text" className="form-control form-control-sm" name="officeRegNo" value={formData.officeRegNo} onChange={handleChange} placeholder="Reg No" />
+                </div>
+                <div className="col-md-3">
+                  <label className="form-label text-start d-block fw-semibold">Reg Year</label>
+                  <input type="text" className="form-control form-control-sm" name="officeRegYear" value={formData.officeRegYear} onChange={handleChange} placeholder="Reg Year" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Office Mail / Phone</label>
+                  <input type="text" className="form-control form-control-sm" name="officeEmail" value={formData.officeEmail} onChange={handleChange} placeholder="Email or Phone" />
+                </div>
+
+                {/* --- BRANCH DETAILS (TOGGLE) --- */}
+                <div className="col-12 mt-4">
+                  <div className="form-check p-3 bg-light border rounded">
+                    <input className="form-check-input ms-1" type="checkbox" id="hasBranch" name="hasBranch" checked={formData.hasBranch} onChange={handleChange} />
+                    <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasBranch">
+                      Include Branch Information
+                    </label>
+                  </div>
+                </div>
+                
+                {formData.hasBranch && (
+                  <>
                     <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">First Name *</label>
-                      <input type="text" className="form-control form-control-sm" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="First Name" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Middle Name</label>
-                      <input type="text" className="form-control form-control-sm" name="middleName" value={formData.middleName} onChange={handleChange} placeholder="Middle Name" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Last Name *</label>
-                      <input type="text" className="form-control form-control-sm" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Last Name" />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Father's Name</label>
-                      <input type="text" className="form-control form-control-sm" name="fathersName" value={formData.fathersName} onChange={handleChange} placeholder="Father's Name" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Mother's Name</label>
-                      <input type="text" className="form-control form-control-sm" name="mothersName" value={formData.mothersName} onChange={handleChange} placeholder="Mother's Name" />
-                    </div>
-
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Relation</label>
-                      <select name="relation" value={formData.relation} onChange={handleChange} className="form-select form-select-sm">
-                        <option value="Father">Father</option>
-                        <option value="Husband">Husband</option>
-                      </select>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Date of Birth</label>
-                      <input type="date" className="form-control form-control-sm" name="dob" value={formData.dob} onChange={handleChange} />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Gender</label>
-                      <select name="sex" value={formData.sex} onChange={handleChange} className="form-select form-select-sm">
-                        <option value="M">Male</option>
-                        <option value="F">Female</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Marital Status</label>
-                      <select name="maritalStatus" value={formData.maritalStatus} onChange={handleChange} className="form-select form-select-sm">
-                        <option value="Single">Single</option>
-                        <option value="Married">Married</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                    <div className="col-md-8">
-                      <label className="form-label text-start d-block fw-semibold">Spouse Name</label>
-                      <input type="text" className="form-control form-control-sm" name="spouseName" value={formData.spouseName} onChange={handleChange} placeholder="Spouse Name" />
-                    </div>
-
-
-                    {/* --- 2. CONTACT & ADDRESS --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Contact & Address</h5>
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Email Address *</label>
-                      <input type="email" className="form-control form-control-sm" name="email" value={formData.email} onChange={handleChange} required placeholder="Email Address" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Phone Number</label>
-                      <input type="text" className="form-control form-control-sm" name="phoneNo" value={formData.phoneNo} onChange={handleChange} placeholder="Phone Number" />
-                    </div>
-
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">City</label>
-                      <input type="text" className="form-control form-control-sm" name="city" value={formData.city} onChange={handleChange} placeholder="City" />
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">State</label>
-                      <select name="state" value={formData.state} onChange={handleChange} className="form-select form-select-sm">
-                        <option value="">Choose...</option>
-                        <option value="Delhi">Delhi</option>
-                        <option value="Maharashtra">Maharashtra</option>
-                        <option value="Karnataka">Karnataka</option>
-                        <option value="West Bengal">West Bengal</option>
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">District</label>
-                      <input type="text" className="form-control form-control-sm" name="district" value={formData.district} onChange={handleChange} placeholder="District" />
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">Pincode</label>
-                      <input type="text" className="form-control form-control-sm" name="pinCode" value={formData.pinCode} onChange={handleChange} placeholder="Pincode" />
-                    </div>
-
-                    <div className="col-12">
-                      <label className="form-label text-start d-block fw-semibold">Local Address</label>
-                      <textarea className="form-control form-control-sm" name="localAddress" value={formData.localAddress} onChange={handleChange} rows="2" placeholder="Local Address" />
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label text-start d-block fw-semibold">Permanent Address</label>
-                      <textarea className="form-control form-control-sm" name="permanentAddress" value={formData.permanentAddress} onChange={handleChange} rows="2" placeholder="Permanent Address" />
-                    </div>
-
-
-                    {/* --- 3. ORGANIZATIONAL HIERARCHY --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Organizational Hierarchy</h5>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Organization Name</label>
-                      <input type="text" className="form-control form-control-sm" name="organizationName" value={formData.organizationName} onChange={handleChange} placeholder="Organization Name" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Site Name</label>
-                      <input type="text" className="form-control form-control-sm" name="siteName" value={formData.siteName} onChange={handleChange} placeholder="Site Name" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Department</label>
-                      <input type="text" className="form-control form-control-sm" name="department" value={formData.department} onChange={handleChange} placeholder="Department" />
-                    </div>
-
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">Job Designation (Rank)</label>
-                      <select name="rank" value={formData.rank} onChange={handleChange} className="form-select form-select-sm">
-                        <option value="">Select Designation...</option>
-                        <option value="ARM GUARD">ARM GUARD</option>
-                        <option value="GUARD">GUARD</option>
-                        <option value="KST">KST</option>
-                        <option value="SG">SG</option>
-                        <option value="Other">Other</option>
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">Status</label>
-                      <select name="status" value={formData.status} onChange={handleChange} className="form-select form-select-sm">
-                        <option value="Available">Available</option>
-                        <option value="Assigned">Assigned</option>
-                        <option value="On Leave">On Leave</option>
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">Date of Join (DOJ)</label>
-                      <input type="date" className="form-control form-control-sm" name="doj" value={formData.doj} onChange={handleChange} />
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">TKT No</label>
-                      <input type="text" className="form-control form-control-sm" name="tktNo" value={formData.tktNo} onChange={handleChange} placeholder="TKT No" />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Reporting Officer Name</label>
-                      <input type="text" className="form-control form-control-sm" name="officerName" value={formData.officerName} onChange={handleChange} placeholder="Officer Name" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Officer Contact No.</label>
-                      <input type="text" className="form-control form-control-sm" name="officerNo" value={formData.officerNo} onChange={handleChange} placeholder="Officer Contact No" />
-                    </div>
-
-
-                    {/* --- OFFICE DETAILS --- */}
-                    <div className="col-12 mt-4">
-                      <h6 className="text-secondary fw-bold">Office Details</h6>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Office Name</label>
-                      <input type="text" className="form-control form-control-sm" name="officeName" value={formData.officeName} onChange={handleChange} placeholder="Office Name" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Reg Location</label>
-                      <input type="text" className="form-control form-control-sm" name="officeRegLocation" value={formData.officeRegLocation} onChange={handleChange} placeholder="Reg Location" />
+                      <label className="form-label text-start d-block fw-semibold">Branch Name</label>
+                      <input type="text" className="form-control form-control-sm" name="branchName" value={formData.branchName} onChange={handleChange} placeholder="Branch Name" />
                     </div>
                     <div className="col-md-4">
                       <label className="form-label text-start d-block fw-semibold">Working Addr.</label>
-                      <input type="text" className="form-control form-control-sm" name="officeWorkingAddress" value={formData.officeWorkingAddress} onChange={handleChange} placeholder="Working Address" />
-                    </div>
-                    
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">Reg No</label>
-                      <input type="text" className="form-control form-control-sm" name="officeRegNo" value={formData.officeRegNo} onChange={handleChange} placeholder="Reg No" />
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label text-start d-block fw-semibold">Reg Year</label>
-                      <input type="text" className="form-control form-control-sm" name="officeRegYear" value={formData.officeRegYear} onChange={handleChange} placeholder="Reg Year" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Office Mail / Phone</label>
-                      <input type="text" className="form-control form-control-sm" name="officeEmail" value={formData.officeEmail} onChange={handleChange} placeholder="Email or Phone" />
-                    </div>
-
-                    {/* --- BRANCH DETAILS (TOGGLE) --- */}
-                    <div className="col-12 mt-4">
-                      <div className="form-check p-3 bg-light border rounded">
-                        <input className="form-check-input ms-1" type="checkbox" id="hasBranch" name="hasBranch" checked={formData.hasBranch} onChange={handleChange} />
-                        <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasBranch">
-                          Include Branch Information
-                        </label>
-                      </div>
-                    </div>
-                    
-                    {formData.hasBranch && (
-                      <>
-                        <div className="col-md-4">
-                          <label className="form-label text-start d-block fw-semibold">Branch Name</label>
-                          <input type="text" className="form-control form-control-sm" name="branchName" value={formData.branchName} onChange={handleChange} placeholder="Branch Name" />
-                        </div>
-                        <div className="col-md-4">
-                          <label className="form-label text-start d-block fw-semibold">Working Addr.</label>
-                          <input type="text" className="form-control form-control-sm" name="branchWorkingAddress" value={formData.branchWorkingAddress} onChange={handleChange} placeholder="Branch Working Address" />
-                        </div>
-                        <div className="col-md-4">
-                          <label className="form-label text-start d-block fw-semibold">Branch ID</label>
-                          <input type="text" className="form-control form-control-sm" name="branchId" value={formData.branchId} onChange={handleChange} placeholder="Branch ID" />
-                        </div>
-                      </>
-                    )}
-
-
-                    {/* --- 4. IDENTITY & BANKING --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Identity & Banking</h5>
+                      <input type="text" className="form-control form-control-sm" name="branchWorkingAddress" value={formData.branchWorkingAddress} onChange={handleChange} placeholder="Branch Working Address" />
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">PAN No</label>
-                      <input type="text" className="form-control form-control-sm" name="panNo" value={formData.panNo} onChange={handleChange} placeholder="PAN No" />
+                      <label className="form-label text-start d-block fw-semibold">Branch ID</label>
+                      <input type="text" className="form-control form-control-sm" name="branchId" value={formData.branchId} onChange={handleChange} placeholder="Branch ID" />
                     </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Aadhar No</label>
-                      <input type="text" className="form-control form-control-sm" name="aadharNo" value={formData.aadharNo} onChange={handleChange} placeholder="Aadhar No" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Voter ID</label>
-                      <input type="text" className="form-control form-control-sm" name="voterId" value={formData.voterId} onChange={handleChange} placeholder="Voter ID" />
-                    </div>
-
-                    <div className="col-12 mt-3">
-                      <h6 className="text-secondary fw-bold">Bank Account Information</h6>
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Bank Name</label>
-                      <input type="text" className="form-control form-control-sm" name="bankName" value={formData.bankName} onChange={handleChange} placeholder="Bank Name" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Branch Name</label>
-                      <input type="text" className="form-control form-control-sm" name="bankBranchName" value={formData.bankBranchName} onChange={handleChange} placeholder="Branch Name" />
-                    </div>
-                    <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">IFSC Code</label>
-                      <input type="text" className="form-control form-control-sm" name="ifscCode" value={formData.ifscCode} onChange={handleChange} placeholder="IFSC Code" />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Account Number</label>
-                      <input type="text" className="form-control form-control-sm" name="accountNo" value={formData.accountNo} onChange={handleChange} placeholder="Account Number" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Bank Address</label>
-                      <input type="text" className="form-control form-control-sm" name="bankAddress" value={formData.bankAddress} onChange={handleChange} placeholder="Bank Address" />
-                    </div>
+                  </>
+                )}
 
 
-                    {/* --- 5. STATUTORY & TAXES --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">PF, ESIC & Taxes</h5>
-                    </div>
-                    <div className="col-12 mb-2">
-                      <div className="form-check p-3 bg-light border rounded">
-                        <input className="form-check-input ms-1" type="checkbox" id="hasStatutoryInfo" name="hasStatutoryInfo" checked={formData.hasStatutoryInfo} onChange={handleChange} />
-                        <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasStatutoryInfo">
-                          Enable Statutory Compliance Details
-                        </label>
-                      </div>
-                    </div>
-
-                    {formData.hasStatutoryInfo && (
-                      <>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">PF Number</label>
-                          <input type="text" className="form-control form-control-sm" name="pfNo" value={formData.pfNo} onChange={handleChange} placeholder="PF Number" />
-                        </div>
-                        <div className="col-md-6 d-flex align-items-center mt-4">
-                          <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="noPf" name="noPf" checked={formData.noPf} onChange={handleChange} />
-                            <label className="form-check-label text-muted fw-bold" htmlFor="noPf">Employee Not Eligible for PF</label>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">ESIC Number</label>
-                          <input type="text" className="form-control form-control-sm" name="esicNo" value={formData.esicNo} onChange={handleChange} placeholder="ESIC Number" />
-                        </div>
-                        <div className="col-md-6 d-flex align-items-center mt-4">
-                          <div className="form-check">
-                            <input className="form-check-input" type="checkbox" id="notEligibleEsic" name="notEligibleEsic" checked={formData.notEligibleEsic} onChange={handleChange} />
-                            <label className="form-check-label text-muted fw-bold" htmlFor="notEligibleEsic">Employee Not Eligible for ESIC</label>
-                          </div>
-                        </div>
-
-                        <div className="col-md-6 mt-3">
-                          <label className="form-label text-start d-block fw-semibold">Tax Deduction (TDS) Applicable</label>
-                          <select name="taxDeductionTds" value={formData.taxDeductionTds} onChange={handleChange} className="form-select form-select-sm">
-                            <option value="No">No</option>
-                            <option value="Yes">Yes</option>
-                          </select>
-                        </div>
-                      </>
-                    )}
-
-
-                    {/* --- 6. SALARY & PAYROLL --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Salary Calculation Setup</h5>
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold text-primary">Basic Salary (Monthly)</label>
-                      <input type="number" className="form-control form-control-sm" name="baseSalary" value={formData.baseSalary} onChange={handleChange} placeholder="0.00" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold text-success">Total Allowances (HRA, TA, etc.)</label>
-                      <input type="number" className="form-control form-control-sm" name="allowances" value={formData.allowances} onChange={handleChange} placeholder="0.00" />
-                    </div>
-
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold text-danger">Fixed Deductions (Advances, etc.)</label>
-                      <input type="number" className="form-control form-control-sm" name="deductions" value={formData.deductions} onChange={handleChange} placeholder="0.00" />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Calculated Net Salary</label>
-                      <input type="number" className="form-control form-control-sm bg-light text-success fw-bold" name="netSalary" value={formData.netSalary} readOnly />
-                    </div>
-
-
-                    {/* --- 7. LICENSES & CERTIFICATIONS --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Certifications & Licenses</h5>
-                    </div>
-                    <div className="col-12 mb-2">
-                      <div className="form-check p-3 bg-light border rounded">
-                        <input className="form-check-input ms-1" type="checkbox" id="hasLicenses" name="hasLicenses" checked={formData.hasLicenses} onChange={handleChange} />
-                        <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasLicenses">
-                          Enable Licenses & Certifications
-                        </label>
-                      </div>
-                    </div>
-
-                    {formData.hasLicenses && (
-                      <>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Police Verification</label>
-                          <select name="policeVerification" value={formData.policeVerification} onChange={handleChange} className="form-select form-select-sm">
-                            <option value="No">No</option><option value="Yes">Yes</option><option value="Pending">Pending</option>
-                          </select>
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Educational Qualification</label>
-                          <input type="text" className="form-control form-control-sm" name="qualification" value={formData.qualification} onChange={handleChange} placeholder="Qualification" />
-                        </div>
-
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Driving License No.</label>
-                          <input type="text" className="form-control form-control-sm" name="drivingLicense" value={formData.drivingLicense} onChange={handleChange} placeholder="Driving License" />
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">DL Valid Upto</label>
-                          <input type="date" className="form-control form-control-sm" name="dlValidUpto" value={formData.dlValidUpto} onChange={handleChange} />
-                        </div>
-
-                        <div className="col-md-4">
-                          <label className="form-label text-start d-block fw-semibold">Gun License No.</label>
-                          <input type="text" className="form-control form-control-sm" name="gunLicense" value={formData.gunLicense} onChange={handleChange} placeholder="Gun License" />
-                        </div>
-                        <div className="col-md-4">
-                          <label className="form-label text-start d-block fw-semibold">Gun Valid Upto</label>
-                          <input type="date" className="form-control form-control-sm" name="gunValidUpto" value={formData.gunValidUpto} onChange={handleChange} />
-                        </div>
-                        <div className="col-md-4">
-                          <label className="form-label text-start d-block fw-semibold">Gun Fitness Cert.</label>
-                          <select name="gunFitnessCertificate" value={formData.gunFitnessCertificate} onChange={handleChange} className="form-select form-select-sm">
-                            <option value="No">No</option><option value="Yes">Yes</option>
-                          </select>
-                        </div>
-                      </>
-                    )}
-
-
-                    {/* --- 8. FAMILY & NOMINEE --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Family & Beneficiary Details</h5>
-                    </div>
-                    <div className="col-12 mb-2">
-                      <div className="form-check p-3 bg-light border rounded">
-                        <input className="form-check-input ms-1" type="checkbox" id="hasNominee" name="hasNominee" checked={formData.hasNominee} onChange={handleChange} />
-                        <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasNominee">
-                          Enable Family & Nominee Register
-                        </label>
-                      </div>
-                    </div>
-
-                    {formData.hasNominee && (
-                      <>
-                        <div className="col-12">
-                          <label className="form-label text-start d-block fw-semibold">Family Details Overview</label>
-                          <textarea className="form-control form-control-sm" name="familyDetails" value={formData.familyDetails} onChange={handleChange} rows="2" placeholder="Family Details" />
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Emergency Contact Relation</label>
-                          <input type="text" className="form-control form-control-sm" name="familyRelation" value={formData.familyRelation} onChange={handleChange} placeholder="Family Relation" />
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Family Member DOB</label>
-                          <input type="date" className="form-control form-control-sm" name="familyMemberDob" value={formData.familyMemberDob} onChange={handleChange} />
-                        </div>
-
-                        <div className="col-12 mt-3"><h6 className="text-secondary fw-bold">PF/Insurance Nominee</h6></div>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Nominee Relation</label>
-                          <input type="text" className="form-control form-control-sm" name="nomineeRelation" value={formData.nomineeRelation} onChange={handleChange} placeholder="Nominee Relation" />
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Nominee DOB</label>
-                          <input type="date" className="form-control form-control-sm" name="nomineeDob" value={formData.nomineeDob} onChange={handleChange} />
-                        </div>
-                      </>
-                    )}
-
-
-                    {/* --- 9. ADDITIONAL INFO --- */}
-                    <div className="col-12 mt-5">
-                      <h5 className="text-primary border-bottom pb-2 fw-bold">Additional Configurations</h5>
-                    </div>
-                    <div className="col-12 mb-2">
-                      <div className="form-check p-3 bg-light border rounded">
-                        <input className="form-check-input ms-1" type="checkbox" id="hasAdditionalInfo" name="hasAdditionalInfo" checked={formData.hasAdditionalInfo} onChange={handleChange} />
-                        <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasAdditionalInfo">
-                          Enable Extra Operational Info
-                        </label>
-                      </div>
-                    </div>
-
-                    {formData.hasAdditionalInfo && (
-                      <>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">NAPS Details</label>
-                          <input type="text" className="form-control form-control-sm" name="forNaps" value={formData.forNaps} onChange={handleChange} placeholder="NAPS Details" />
-                        </div>
-                        <div className="col-md-6">
-                          <label className="form-label text-start d-block fw-semibold">Uniform Allocation</label>
-                          <input type="text" className="form-control form-control-sm" name="uniformDetails" value={formData.uniformDetails} onChange={handleChange} placeholder="Uniform Allocation" />
-                        </div>
-                        <div className="col-12">
-                          <label className="form-label text-start d-block fw-semibold">Specific Deduction Notes</label>
-                          <input type="text" className="form-control form-control-sm" name="deductionDetails" value={formData.deductionDetails} onChange={handleChange} placeholder="Deduction Notes" />
-                        </div>
-                        <div className="col-12">
-                          <label className="form-label text-start d-block fw-semibold">General Remarks</label>
-                          <textarea className="form-control form-control-sm" name="remarks" value={formData.remarks} onChange={handleChange} rows="3" placeholder="Remarks" />
-                        </div>
-                      </>
-                    )}
-
-                  </form>
+                {/* --- 4. IDENTITY & BANKING --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Identity & Banking</h5>
                 </div>
-              </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">PAN No</label>
+                  <input type="text" className="form-control form-control-sm" name="panNo" value={formData.panNo} onChange={handleChange} placeholder="PAN No" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Aadhar No</label>
+                  <input type="text" className="form-control form-control-sm" name="aadharNo" value={formData.aadharNo} onChange={handleChange} placeholder="Aadhar No" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Voter ID</label>
+                  <input type="text" className="form-control form-control-sm" name="voterId" value={formData.voterId} onChange={handleChange} placeholder="Voter ID" />
+                </div>
 
-              {/* Modal Footer */}
-              <div className="modal-footer bg-light">
-                <button type="button" className="btn btn-secondary px-4 shadow-sm" onClick={() => setIsModalOpen(false)}>Cancel</button>
-                <button type="submit" form="employeeForm" className="btn btn-primary px-5 shadow-sm fw-bold">
-                  {editingId ? 'Update Employee' : 'Submit Registration'}
-                </button>
-              </div>
+                <div className="col-12 mt-3">
+                  <h6 className="text-secondary fw-bold">Bank Account Information</h6>
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Bank Name</label>
+                  <input type="text" className="form-control form-control-sm" name="bankName" value={formData.bankName} onChange={handleChange} placeholder="Bank Name" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">Branch Name</label>
+                  <input type="text" className="form-control form-control-sm" name="bankBranchName" value={formData.bankBranchName} onChange={handleChange} placeholder="Branch Name" />
+                </div>
+                <div className="col-md-4">
+                  <label className="form-label text-start d-block fw-semibold">IFSC Code</label>
+                  <input type="text" className="form-control form-control-sm" name="ifscCode" value={formData.ifscCode} onChange={handleChange} placeholder="IFSC Code" />
+                </div>
 
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Account Number</label>
+                  <input type="text" className="form-control form-control-sm" name="accountNo" value={formData.accountNo} onChange={handleChange} placeholder="Account Number" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Bank Address</label>
+                  <input type="text" className="form-control form-control-sm" name="bankAddress" value={formData.bankAddress} onChange={handleChange} placeholder="Bank Address" />
+                </div>
+
+
+                {/* --- 5. STATUTORY & TAXES --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">PF, ESIC & Taxes</h5>
+                </div>
+                <div className="col-12 mb-2">
+                  <div className="form-check p-3 bg-light border rounded">
+                    <input className="form-check-input ms-1" type="checkbox" id="hasStatutoryInfo" name="hasStatutoryInfo" checked={formData.hasStatutoryInfo} onChange={handleChange} />
+                    <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasStatutoryInfo">
+                      Enable Statutory Compliance Details
+                    </label>
+                  </div>
+                </div>
+
+                {formData.hasStatutoryInfo && (
+                  <>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">PF Number</label>
+                      <input type="text" className="form-control form-control-sm" name="pfNo" value={formData.pfNo} onChange={handleChange} placeholder="PF Number" />
+                    </div>
+                    <div className="col-md-6 d-flex align-items-center mt-4">
+                      <div className="form-check">
+                        <input className="form-check-input" type="checkbox" id="noPf" name="noPf" checked={formData.noPf} onChange={handleChange} />
+                        <label className="form-check-label text-muted fw-bold" htmlFor="noPf">Employee Not Eligible for PF</label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">ESIC Number</label>
+                      <input type="text" className="form-control form-control-sm" name="esicNo" value={formData.esicNo} onChange={handleChange} placeholder="ESIC Number" />
+                    </div>
+                    <div className="col-md-6 d-flex align-items-center mt-4">
+                      <div className="form-check">
+                        <input className="form-check-input" type="checkbox" id="notEligibleEsic" name="notEligibleEsic" checked={formData.notEligibleEsic} onChange={handleChange} />
+                        <label className="form-check-label text-muted fw-bold" htmlFor="notEligibleEsic">Employee Not Eligible for ESIC</label>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6 mt-3">
+                      <label className="form-label text-start d-block fw-semibold">Tax Deduction (TDS) Applicable</label>
+                      <select name="taxDeductionTds" value={formData.taxDeductionTds} onChange={handleChange} className="form-select form-select-sm">
+                        <option value="No">No</option>
+                        <option value="Yes">Yes</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
+
+                {/* --- 6. SALARY & PAYROLL --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Salary Calculation Setup</h5>
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold text-primary">Basic Salary (Monthly)</label>
+                  <input type="number" className="form-control form-control-sm" name="baseSalary" value={formData.baseSalary} onChange={handleChange} placeholder="0.00" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold text-success">Total Allowances (HRA, TA, etc.)</label>
+                  <input type="number" className="form-control form-control-sm" name="allowances" value={formData.allowances} onChange={handleChange} placeholder="0.00" />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold text-danger">Fixed Deductions (Advances, etc.)</label>
+                  <input type="number" className="form-control form-control-sm" name="deductions" value={formData.deductions} onChange={handleChange} placeholder="0.00" />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label text-start d-block fw-semibold">Calculated Net Salary</label>
+                  <input type="number" className="form-control form-control-sm bg-light text-success fw-bold" name="netSalary" value={formData.netSalary} readOnly />
+                </div>
+
+
+                {/* --- 7. LICENSES & CERTIFICATIONS --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Certifications & Licenses</h5>
+                </div>
+                <div className="col-12 mb-2">
+                  <div className="form-check p-3 bg-light border rounded">
+                    <input className="form-check-input ms-1" type="checkbox" id="hasLicenses" name="hasLicenses" checked={formData.hasLicenses} onChange={handleChange} />
+                    <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasLicenses">
+                      Enable Licenses & Certifications
+                    </label>
+                  </div>
+                </div>
+
+                {formData.hasLicenses && (
+                  <>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Police Verification</label>
+                      <select name="policeVerification" value={formData.policeVerification} onChange={handleChange} className="form-select form-select-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option><option value="Pending">Pending</option>
+                      </select>
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Educational Qualification</label>
+                      <input type="text" className="form-control form-control-sm" name="qualification" value={formData.qualification} onChange={handleChange} placeholder="Qualification" />
+                    </div>
+
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Driving License No.</label>
+                      <input type="text" className="form-control form-control-sm" name="drivingLicense" value={formData.drivingLicense} onChange={handleChange} placeholder="Driving License" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">DL Valid Upto</label>
+                      <input type="date" className="form-control form-control-sm" name="dlValidUpto" value={formData.dlValidUpto} onChange={handleChange} />
+                    </div>
+
+                    <div className="col-md-4">
+                      <label className="form-label text-start d-block fw-semibold">Gun License No.</label>
+                      <input type="text" className="form-control form-control-sm" name="gunLicense" value={formData.gunLicense} onChange={handleChange} placeholder="Gun License" />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label text-start d-block fw-semibold">Gun Valid Upto</label>
+                      <input type="date" className="form-control form-control-sm" name="gunValidUpto" value={formData.gunValidUpto} onChange={handleChange} />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label text-start d-block fw-semibold">Gun Fitness Cert.</label>
+                      <select name="gunFitnessCertificate" value={formData.gunFitnessCertificate} onChange={handleChange} className="form-select form-select-sm">
+                        <option value="No">No</option><option value="Yes">Yes</option>
+                      </select>
+                    </div>
+                  </>
+                )}
+
+
+                {/* --- 8. FAMILY & NOMINEE --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Family & Beneficiary Details</h5>
+                </div>
+                <div className="col-12 mb-2">
+                  <div className="form-check p-3 bg-light border rounded">
+                    <input className="form-check-input ms-1" type="checkbox" id="hasNominee" name="hasNominee" checked={formData.hasNominee} onChange={handleChange} />
+                    <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasNominee">
+                      Enable Family & Nominee Register
+                    </label>
+                  </div>
+                </div>
+
+                {formData.hasNominee && (
+                  <>
+                    <div className="col-12">
+                      <label className="form-label text-start d-block fw-semibold">Family Details Overview</label>
+                      <textarea className="form-control form-control-sm" name="familyDetails" value={formData.familyDetails} onChange={handleChange} rows="2" placeholder="Family Details" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Emergency Contact Relation</label>
+                      <input type="text" className="form-control form-control-sm" name="familyRelation" value={formData.familyRelation} onChange={handleChange} placeholder="Family Relation" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Family Member DOB</label>
+                      <input type="date" className="form-control form-control-sm" name="familyMemberDob" value={formData.familyMemberDob} onChange={handleChange} />
+                    </div>
+
+                    <div className="col-12 mt-3"><h6 className="text-secondary fw-bold">PF/Insurance Nominee</h6></div>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Nominee Relation</label>
+                      <input type="text" className="form-control form-control-sm" name="nomineeRelation" value={formData.nomineeRelation} onChange={handleChange} placeholder="Nominee Relation" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Nominee DOB</label>
+                      <input type="date" className="form-control form-control-sm" name="nomineeDob" value={formData.nomineeDob} onChange={handleChange} />
+                    </div>
+                  </>
+                )}
+
+
+                {/* --- 9. ADDITIONAL INFO --- */}
+                <div className="col-12 mt-5">
+                  <h5 className="text-primary border-bottom pb-2 fw-bold">Additional Configurations</h5>
+                </div>
+                <div className="col-12 mb-2">
+                  <div className="form-check p-3 bg-light border rounded">
+                    <input className="form-check-input ms-1" type="checkbox" id="hasAdditionalInfo" name="hasAdditionalInfo" checked={formData.hasAdditionalInfo} onChange={handleChange} />
+                    <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasAdditionalInfo">
+                      Enable Extra Operational Info
+                    </label>
+                  </div>
+                </div>
+
+                {formData.hasAdditionalInfo && (
+                  <>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">NAPS Details</label>
+                      <input type="text" className="form-control form-control-sm" name="forNaps" value={formData.forNaps} onChange={handleChange} placeholder="NAPS Details" />
+                    </div>
+                    <div className="col-md-6">
+                      <label className="form-label text-start d-block fw-semibold">Uniform Allocation</label>
+                      <input type="text" className="form-control form-control-sm" name="uniformDetails" value={formData.uniformDetails} onChange={handleChange} placeholder="Uniform Allocation" />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label text-start d-block fw-semibold">Specific Deduction Notes</label>
+                      <input type="text" className="form-control form-control-sm" name="deductionDetails" value={formData.deductionDetails} onChange={handleChange} placeholder="Deduction Notes" />
+                    </div>
+                    <div className="col-12">
+                      <label className="form-label text-start d-block fw-semibold">General Remarks</label>
+                      <textarea className="form-control form-control-sm" name="remarks" value={formData.remarks} onChange={handleChange} rows="3" placeholder="Remarks" />
+                    </div>
+                  </>
+                )}
+
+              </form>
             </div>
           </div>
+
+          {/* Form Footer */}
+          <div className="card-footer bg-light py-3 d-flex justify-content-end gap-2">
+            <button type="button" className="btn btn-secondary px-4 shadow-sm" onClick={() => setIsModalOpen(false)}>Cancel</button>
+            <button type="submit" form="employeeForm" className="btn btn-primary px-5 shadow-sm fw-bold">
+              {editingId ? 'Update Employee' : 'Submit Registration'}
+            </button>
+          </div>
+
         </div>
       )}
     </div>
