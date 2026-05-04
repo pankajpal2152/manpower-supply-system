@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import './Sidebar.css'; // <-- Import the new CSS file
 
 const Sidebar = ({ user }) => {
   const location = useLocation();
@@ -25,23 +26,13 @@ const Sidebar = ({ user }) => {
   });
 
   return (
-    <div style={{
-      width: '250px',
-      minWidth: '250px', // FIX: Prevents the sidebar from squishing on smaller tablets
-      flexShrink: 0,     // FIX: Forces the sidebar to keep its structural size
-      backgroundColor: '#1e293b',
-      color: 'white',
-      height: '100vh',
-      padding: '20px',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      <h2 style={{ textAlign: 'center', marginBottom: '30px', color: '#38bdf8' }}>
+    <div className="sidebar-container">
+      <h2 className="sidebar-title">
         Manpower System
       </h2>
       
       {/* Added overflowY: auto so if menu items get too long, they scroll nicely inside the sidebar */}
-      <nav style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto' }}>
+      <nav className="sidebar-nav">
         {visibleMenuItems.map((item) => {
           const isActive = location.pathname === item.path;
           return (
@@ -50,20 +41,11 @@ const Sidebar = ({ user }) => {
               to={item.path}
               // Accessibility enhancement: Tells screen readers this is the current page
               aria-current={isActive ? 'page' : undefined}
-              style={{
-                color: isActive ? '#38bdf8' : '#cbd5e1',
-                textDecoration: 'none',
-                padding: '10px 15px',
-                borderRadius: '5px',
-                backgroundColor: isActive ? '#334155' : 'transparent',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                transition: 'background 0.2s'
-              }}
+              // We use string interpolation to assign classes dynamically based on the active state
+              className={`sidebar-link ${isActive ? 'active' : 'inactive'}`}
             >
               {/* Accessibility enhancement: Hides the emoji from screen readers to prevent clutter */}
-              <span aria-hidden="true">{item.icon}</span>
+              <span aria-hidden="true" className="sidebar-icon">{item.icon}</span>
               {item.name}
             </Link>
           );

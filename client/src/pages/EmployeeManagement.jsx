@@ -1054,6 +1054,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../api/axios';
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Plus, Pencil, Trash2, X } from 'lucide-react';
+import './EmployeeManagement.css'; // <-- Importing the new CSS file
 
 const emptyEmployeeForm = {
   // 1. Personal
@@ -1116,7 +1117,6 @@ const EmployeeManagement = () => {
     fetchEmployees();
   }, []);
 
-  // Calculate Net Salary automatically
   useEffect(() => {
     const basic = parseFloat(formData.baseSalary) || 0;
     const allow = parseFloat(formData.allowances) || 0;
@@ -1172,10 +1172,10 @@ const EmployeeManagement = () => {
   };
 
   return (
-    <div className="container-fluid py-4" style={{ backgroundColor: '#f8f9fa', minHeight: '100vh' }}>
+    <div className="emp-wrapper">
       
       {!isModalOpen ? (
-        <>
+        <div className="emp-list-view">
           {/* HEADER SECTION */}
           <div className="d-flex justify-content-between align-items-center mb-4">
             <div>
@@ -1233,63 +1233,63 @@ const EmployeeManagement = () => {
               </table>
             </div>
           </div>
-        </>
+        </div>
       ) : (
-        /* IN-PAGE FORM VIEW (Replaces the Fullscreen Modal) */
-        <div className="card shadow-sm border-0 mb-4">
-          
-          {/* Form Header */}
-          <div className="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
-            <h5 className="mb-0 fw-bold">
-              {editingId ? 'Edit Employee Data' : 'Employee Registration Form'}
-            </h5>
-            <button type="button" className="btn-close btn-close-white" onClick={() => setIsModalOpen(false)} aria-label="Close"></button>
-          </div>
+        /* IN-PAGE FORM VIEW */
+        <div className="emp-form-view">
+          <div className="emp-card">
+            
+            {/* Form Header */}
+            <div className="emp-card-header">
+              <h5 className="mb-0 fw-bold">
+                {editingId ? 'Edit Employee Data' : 'Employee Registration Form'}
+              </h5>
+              <button type="button" className="btn-close btn-close-white" onClick={() => setIsModalOpen(false)} aria-label="Close"></button>
+            </div>
 
-          {/* Form Body */}
-          <div className="card-body bg-light p-4 p-md-5">
-            <div className="container bg-white p-4 shadow-sm rounded-3">
+            {/* Form Body */}
+            <div className="emp-card-body">
               <form id="employeeForm" onSubmit={handleSubmit} className="row g-3">
                 
                 {/* --- 1. PERSONAL INFORMATION --- */}
-                <div className="col-12 mt-0">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Personal Information</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title first-section">Personal Information</h5>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">First Name *</label>
+                  <label className="emp-label">First Name *</label>
                   <input type="text" className="form-control form-control-sm" name="firstName" value={formData.firstName} onChange={handleChange} required placeholder="First Name" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Middle Name</label>
+                  <label className="emp-label">Middle Name</label>
                   <input type="text" className="form-control form-control-sm" name="middleName" value={formData.middleName} onChange={handleChange} placeholder="Middle Name" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Last Name *</label>
+                  <label className="emp-label">Last Name *</label>
                   <input type="text" className="form-control form-control-sm" name="lastName" value={formData.lastName} onChange={handleChange} required placeholder="Last Name" />
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Father's Name</label>
+                  <label className="emp-label">Father's Name</label>
                   <input type="text" className="form-control form-control-sm" name="fathersName" value={formData.fathersName} onChange={handleChange} placeholder="Father's Name" />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Mother's Name</label>
+                  <label className="emp-label">Mother's Name</label>
                   <input type="text" className="form-control form-control-sm" name="mothersName" value={formData.mothersName} onChange={handleChange} placeholder="Mother's Name" />
                 </div>
 
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Relation</label>
+                  <label className="emp-label">Relation</label>
                   <select name="relation" value={formData.relation} onChange={handleChange} className="form-select form-select-sm">
                     <option value="Father">Father</option>
                     <option value="Husband">Husband</option>
                   </select>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Date of Birth</label>
+                  <label className="emp-label">Date of Birth</label>
                   <input type="date" className="form-control form-control-sm" name="dob" value={formData.dob} onChange={handleChange} />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Gender</label>
+                  <label className="emp-label">Gender</label>
                   <select name="sex" value={formData.sex} onChange={handleChange} className="form-select form-select-sm">
                     <option value="M">Male</option>
                     <option value="F">Female</option>
@@ -1298,7 +1298,7 @@ const EmployeeManagement = () => {
                 </div>
 
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Marital Status</label>
+                  <label className="emp-label">Marital Status</label>
                   <select name="maritalStatus" value={formData.maritalStatus} onChange={handleChange} className="form-select form-select-sm">
                     <option value="Single">Single</option>
                     <option value="Married">Married</option>
@@ -1306,30 +1306,30 @@ const EmployeeManagement = () => {
                   </select>
                 </div>
                 <div className="col-md-8">
-                  <label className="form-label text-start d-block fw-semibold">Spouse Name</label>
+                  <label className="emp-label">Spouse Name</label>
                   <input type="text" className="form-control form-control-sm" name="spouseName" value={formData.spouseName} onChange={handleChange} placeholder="Spouse Name" />
                 </div>
 
 
                 {/* --- 2. CONTACT & ADDRESS --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Contact & Address</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">Contact & Address</h5>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Email Address *</label>
+                  <label className="emp-label">Email Address *</label>
                   <input type="email" className="form-control form-control-sm" name="email" value={formData.email} onChange={handleChange} required placeholder="Email Address" />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Phone Number</label>
+                  <label className="emp-label">Phone Number</label>
                   <input type="text" className="form-control form-control-sm" name="phoneNo" value={formData.phoneNo} onChange={handleChange} placeholder="Phone Number" />
                 </div>
 
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">City</label>
+                  <label className="emp-label">City</label>
                   <input type="text" className="form-control form-control-sm" name="city" value={formData.city} onChange={handleChange} placeholder="City" />
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">State</label>
+                  <label className="emp-label">State</label>
                   <select name="state" value={formData.state} onChange={handleChange} className="form-select form-select-sm">
                     <option value="">Choose...</option>
                     <option value="Delhi">Delhi</option>
@@ -1339,43 +1339,43 @@ const EmployeeManagement = () => {
                   </select>
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">District</label>
+                  <label className="emp-label">District</label>
                   <input type="text" className="form-control form-control-sm" name="district" value={formData.district} onChange={handleChange} placeholder="District" />
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">Pincode</label>
+                  <label className="emp-label">Pincode</label>
                   <input type="text" className="form-control form-control-sm" name="pinCode" value={formData.pinCode} onChange={handleChange} placeholder="Pincode" />
                 </div>
 
                 <div className="col-12">
-                  <label className="form-label text-start d-block fw-semibold">Local Address</label>
+                  <label className="emp-label">Local Address</label>
                   <textarea className="form-control form-control-sm" name="localAddress" value={formData.localAddress} onChange={handleChange} rows="2" placeholder="Local Address" />
                 </div>
                 <div className="col-12">
-                  <label className="form-label text-start d-block fw-semibold">Permanent Address</label>
+                  <label className="emp-label">Permanent Address</label>
                   <textarea className="form-control form-control-sm" name="permanentAddress" value={formData.permanentAddress} onChange={handleChange} rows="2" placeholder="Permanent Address" />
                 </div>
 
 
                 {/* --- 3. ORGANIZATIONAL HIERARCHY --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Organizational Hierarchy</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">Organizational Hierarchy</h5>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Organization Name</label>
+                  <label className="emp-label">Organization Name</label>
                   <input type="text" className="form-control form-control-sm" name="organizationName" value={formData.organizationName} onChange={handleChange} placeholder="Organization Name" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Site Name</label>
+                  <label className="emp-label">Site Name</label>
                   <input type="text" className="form-control form-control-sm" name="siteName" value={formData.siteName} onChange={handleChange} placeholder="Site Name" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Department</label>
+                  <label className="emp-label">Department</label>
                   <input type="text" className="form-control form-control-sm" name="department" value={formData.department} onChange={handleChange} placeholder="Department" />
                 </div>
 
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">Job Designation (Rank)</label>
+                  <label className="emp-label">Job Designation (Rank)</label>
                   <select name="rank" value={formData.rank} onChange={handleChange} className="form-select form-select-sm">
                     <option value="">Select Designation...</option>
                     <option value="ARM GUARD">ARM GUARD</option>
@@ -1386,7 +1386,7 @@ const EmployeeManagement = () => {
                   </select>
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">Status</label>
+                  <label className="emp-label">Status</label>
                   <select name="status" value={formData.status} onChange={handleChange} className="form-select form-select-sm">
                     <option value="Available">Available</option>
                     <option value="Assigned">Assigned</option>
@@ -1394,30 +1394,30 @@ const EmployeeManagement = () => {
                   </select>
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">Date of Join (DOJ)</label>
+                  <label className="emp-label">Date of Join (DOJ)</label>
                   <input type="date" className="form-control form-control-sm" name="doj" value={formData.doj} onChange={handleChange} />
                 </div>
                 <div className="col-md-3">
-                  <label className="form-label text-start d-block fw-semibold">TKT No</label>
+                  <label className="emp-label">TKT No</label>
                   <input type="text" className="form-control form-control-sm" name="tktNo" value={formData.tktNo} onChange={handleChange} placeholder="TKT No" />
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Reporting Officer Name</label>
+                  <label className="emp-label">Reporting Officer Name</label>
                   <input type="text" className="form-control form-control-sm" name="officerName" value={formData.officerName} onChange={handleChange} placeholder="Officer Name" />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Officer Contact No.</label>
+                  <label className="emp-label">Officer Contact No.</label>
                   <input type="text" className="form-control form-control-sm" name="officerNo" value={formData.officerNo} onChange={handleChange} placeholder="Officer Contact No" />
                 </div>
 
 
                 {/* --- OFFICE DETAILS --- */}
-                <div className="col-12 mt-4">
-                  <h6 className="text-secondary fw-bold">Office Details</h6>
+                <div className="col-12">
+                  <h6 className="emp-sub-section-title">Office Details</h6>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Office Name</label>
+                  <label className="emp-label">Office Name</label>
                   <input type="text" className="form-control form-control-sm" name="officeName" value={formData.officeName} onChange={handleChange} placeholder="Office Name" />
                 </div>
                 <div className="col-md-4">
@@ -1443,9 +1443,9 @@ const EmployeeManagement = () => {
                 </div>
 
                 {/* --- BRANCH DETAILS (TOGGLE) --- */}
-                <div className="col-12 mt-4">
-                  <div className="form-check p-3 bg-light border rounded">
-                    <input className="form-check-input ms-1" type="checkbox" id="hasBranch" name="hasBranch" checked={formData.hasBranch} onChange={handleChange} />
+                <div className="col-12">
+                  <div className="emp-toggle-box form-check">
+                    <input className="form-check-input" type="checkbox" id="hasBranch" name="hasBranch" checked={formData.hasBranch} onChange={handleChange} />
                     <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasBranch">
                       Include Branch Information
                     </label>
@@ -1471,54 +1471,54 @@ const EmployeeManagement = () => {
 
 
                 {/* --- 4. IDENTITY & BANKING --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Identity & Banking</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">Identity & Banking</h5>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">PAN No</label>
+                  <label className="emp-label">PAN No</label>
                   <input type="text" className="form-control form-control-sm" name="panNo" value={formData.panNo} onChange={handleChange} placeholder="PAN No" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Aadhar No</label>
+                  <label className="emp-label">Aadhar No</label>
                   <input type="text" className="form-control form-control-sm" name="aadharNo" value={formData.aadharNo} onChange={handleChange} placeholder="Aadhar No" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Voter ID</label>
+                  <label className="emp-label">Voter ID</label>
                   <input type="text" className="form-control form-control-sm" name="voterId" value={formData.voterId} onChange={handleChange} placeholder="Voter ID" />
                 </div>
 
-                <div className="col-12 mt-3">
-                  <h6 className="text-secondary fw-bold">Bank Account Information</h6>
+                <div className="col-12">
+                  <h6 className="emp-sub-section-title">Bank Account Information</h6>
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Bank Name</label>
+                  <label className="emp-label">Bank Name</label>
                   <input type="text" className="form-control form-control-sm" name="bankName" value={formData.bankName} onChange={handleChange} placeholder="Bank Name" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">Branch Name</label>
+                  <label className="emp-label">Branch Name</label>
                   <input type="text" className="form-control form-control-sm" name="bankBranchName" value={formData.bankBranchName} onChange={handleChange} placeholder="Branch Name" />
                 </div>
                 <div className="col-md-4">
-                  <label className="form-label text-start d-block fw-semibold">IFSC Code</label>
+                  <label className="emp-label">IFSC Code</label>
                   <input type="text" className="form-control form-control-sm" name="ifscCode" value={formData.ifscCode} onChange={handleChange} placeholder="IFSC Code" />
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Account Number</label>
+                  <label className="emp-label">Account Number</label>
                   <input type="text" className="form-control form-control-sm" name="accountNo" value={formData.accountNo} onChange={handleChange} placeholder="Account Number" />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Bank Address</label>
+                  <label className="emp-label">Bank Address</label>
                   <input type="text" className="form-control form-control-sm" name="bankAddress" value={formData.bankAddress} onChange={handleChange} placeholder="Bank Address" />
                 </div>
 
 
                 {/* --- 5. STATUTORY & TAXES --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">PF, ESIC & Taxes</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">PF, ESIC & Taxes</h5>
                 </div>
                 <div className="col-12 mb-2">
-                  <div className="form-check p-3 bg-light border rounded">
+                  <div className="emp-toggle-box form-check">
                     <input className="form-check-input ms-1" type="checkbox" id="hasStatutoryInfo" name="hasStatutoryInfo" checked={formData.hasStatutoryInfo} onChange={handleChange} />
                     <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasStatutoryInfo">
                       Enable Statutory Compliance Details
@@ -1529,7 +1529,7 @@ const EmployeeManagement = () => {
                 {formData.hasStatutoryInfo && (
                   <>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">PF Number</label>
+                      <label className="emp-label">PF Number</label>
                       <input type="text" className="form-control form-control-sm" name="pfNo" value={formData.pfNo} onChange={handleChange} placeholder="PF Number" />
                     </div>
                     <div className="col-md-6 d-flex align-items-center mt-4">
@@ -1540,7 +1540,7 @@ const EmployeeManagement = () => {
                     </div>
 
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">ESIC Number</label>
+                      <label className="emp-label">ESIC Number</label>
                       <input type="text" className="form-control form-control-sm" name="esicNo" value={formData.esicNo} onChange={handleChange} placeholder="ESIC Number" />
                     </div>
                     <div className="col-md-6 d-flex align-items-center mt-4">
@@ -1551,7 +1551,7 @@ const EmployeeManagement = () => {
                     </div>
 
                     <div className="col-md-6 mt-3">
-                      <label className="form-label text-start d-block fw-semibold">Tax Deduction (TDS) Applicable</label>
+                      <label className="emp-label">Tax Deduction (TDS) Applicable</label>
                       <select name="taxDeductionTds" value={formData.taxDeductionTds} onChange={handleChange} className="form-select form-select-sm">
                         <option value="No">No</option>
                         <option value="Yes">Yes</option>
@@ -1562,34 +1562,34 @@ const EmployeeManagement = () => {
 
 
                 {/* --- 6. SALARY & PAYROLL --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Salary Calculation Setup</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">Salary Calculation Setup</h5>
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold text-primary">Basic Salary (Monthly)</label>
+                  <label className="emp-label text-primary">Basic Salary (Monthly)</label>
                   <input type="number" className="form-control form-control-sm" name="baseSalary" value={formData.baseSalary} onChange={handleChange} placeholder="0.00" />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold text-success">Total Allowances (HRA, TA, etc.)</label>
+                  <label className="emp-label text-success">Total Allowances (HRA, TA, etc.)</label>
                   <input type="number" className="form-control form-control-sm" name="allowances" value={formData.allowances} onChange={handleChange} placeholder="0.00" />
                 </div>
 
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold text-danger">Fixed Deductions (Advances, etc.)</label>
+                  <label className="emp-label text-danger">Fixed Deductions (Advances, etc.)</label>
                   <input type="number" className="form-control form-control-sm" name="deductions" value={formData.deductions} onChange={handleChange} placeholder="0.00" />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label text-start d-block fw-semibold">Calculated Net Salary</label>
+                  <label className="emp-label">Calculated Net Salary</label>
                   <input type="number" className="form-control form-control-sm bg-light text-success fw-bold" name="netSalary" value={formData.netSalary} readOnly />
                 </div>
 
 
                 {/* --- 7. LICENSES & CERTIFICATIONS --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Certifications & Licenses</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">Certifications & Licenses</h5>
                 </div>
                 <div className="col-12 mb-2">
-                  <div className="form-check p-3 bg-light border rounded">
+                  <div className="emp-toggle-box form-check">
                     <input className="form-check-input ms-1" type="checkbox" id="hasLicenses" name="hasLicenses" checked={formData.hasLicenses} onChange={handleChange} />
                     <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasLicenses">
                       Enable Licenses & Certifications
@@ -1600,35 +1600,35 @@ const EmployeeManagement = () => {
                 {formData.hasLicenses && (
                   <>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Police Verification</label>
+                      <label className="emp-label">Police Verification</label>
                       <select name="policeVerification" value={formData.policeVerification} onChange={handleChange} className="form-select form-select-sm">
                         <option value="No">No</option><option value="Yes">Yes</option><option value="Pending">Pending</option>
                       </select>
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Educational Qualification</label>
+                      <label className="emp-label">Educational Qualification</label>
                       <input type="text" className="form-control form-control-sm" name="qualification" value={formData.qualification} onChange={handleChange} placeholder="Qualification" />
                     </div>
 
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Driving License No.</label>
+                      <label className="emp-label">Driving License No.</label>
                       <input type="text" className="form-control form-control-sm" name="drivingLicense" value={formData.drivingLicense} onChange={handleChange} placeholder="Driving License" />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">DL Valid Upto</label>
+                      <label className="emp-label">DL Valid Upto</label>
                       <input type="date" className="form-control form-control-sm" name="dlValidUpto" value={formData.dlValidUpto} onChange={handleChange} />
                     </div>
 
                     <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Gun License No.</label>
+                      <label className="emp-label">Gun License No.</label>
                       <input type="text" className="form-control form-control-sm" name="gunLicense" value={formData.gunLicense} onChange={handleChange} placeholder="Gun License" />
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Gun Valid Upto</label>
+                      <label className="emp-label">Gun Valid Upto</label>
                       <input type="date" className="form-control form-control-sm" name="gunValidUpto" value={formData.gunValidUpto} onChange={handleChange} />
                     </div>
                     <div className="col-md-4">
-                      <label className="form-label text-start d-block fw-semibold">Gun Fitness Cert.</label>
+                      <label className="emp-label">Gun Fitness Cert.</label>
                       <select name="gunFitnessCertificate" value={formData.gunFitnessCertificate} onChange={handleChange} className="form-select form-select-sm">
                         <option value="No">No</option><option value="Yes">Yes</option>
                       </select>
@@ -1638,11 +1638,11 @@ const EmployeeManagement = () => {
 
 
                 {/* --- 8. FAMILY & NOMINEE --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Family & Beneficiary Details</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">Family & Beneficiary Details</h5>
                 </div>
                 <div className="col-12 mb-2">
-                  <div className="form-check p-3 bg-light border rounded">
+                  <div className="emp-toggle-box form-check">
                     <input className="form-check-input ms-1" type="checkbox" id="hasNominee" name="hasNominee" checked={formData.hasNominee} onChange={handleChange} />
                     <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasNominee">
                       Enable Family & Nominee Register
@@ -1653,25 +1653,27 @@ const EmployeeManagement = () => {
                 {formData.hasNominee && (
                   <>
                     <div className="col-12">
-                      <label className="form-label text-start d-block fw-semibold">Family Details Overview</label>
+                      <label className="emp-label">Family Details Overview</label>
                       <textarea className="form-control form-control-sm" name="familyDetails" value={formData.familyDetails} onChange={handleChange} rows="2" placeholder="Family Details" />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Emergency Contact Relation</label>
+                      <label className="emp-label">Emergency Contact Relation</label>
                       <input type="text" className="form-control form-control-sm" name="familyRelation" value={formData.familyRelation} onChange={handleChange} placeholder="Family Relation" />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Family Member DOB</label>
+                      <label className="emp-label">Family Member DOB</label>
                       <input type="date" className="form-control form-control-sm" name="familyMemberDob" value={formData.familyMemberDob} onChange={handleChange} />
                     </div>
 
-                    <div className="col-12 mt-3"><h6 className="text-secondary fw-bold">PF/Insurance Nominee</h6></div>
+                    <div className="col-12">
+                      <h6 className="emp-sub-section-title">PF/Insurance Nominee</h6>
+                    </div>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Nominee Relation</label>
+                      <label className="emp-label">Nominee Relation</label>
                       <input type="text" className="form-control form-control-sm" name="nomineeRelation" value={formData.nomineeRelation} onChange={handleChange} placeholder="Nominee Relation" />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Nominee DOB</label>
+                      <label className="emp-label">Nominee DOB</label>
                       <input type="date" className="form-control form-control-sm" name="nomineeDob" value={formData.nomineeDob} onChange={handleChange} />
                     </div>
                   </>
@@ -1679,11 +1681,11 @@ const EmployeeManagement = () => {
 
 
                 {/* --- 9. ADDITIONAL INFO --- */}
-                <div className="col-12 mt-5">
-                  <h5 className="text-primary border-bottom pb-2 fw-bold">Additional Configurations</h5>
+                <div className="col-12">
+                  <h5 className="emp-section-title">Additional Configurations</h5>
                 </div>
                 <div className="col-12 mb-2">
-                  <div className="form-check p-3 bg-light border rounded">
+                  <div className="emp-toggle-box form-check">
                     <input className="form-check-input ms-1" type="checkbox" id="hasAdditionalInfo" name="hasAdditionalInfo" checked={formData.hasAdditionalInfo} onChange={handleChange} />
                     <label className="form-check-label fw-bold text-primary ms-2" htmlFor="hasAdditionalInfo">
                       Enable Extra Operational Info
@@ -1694,19 +1696,19 @@ const EmployeeManagement = () => {
                 {formData.hasAdditionalInfo && (
                   <>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">NAPS Details</label>
+                      <label className="emp-label">NAPS Details</label>
                       <input type="text" className="form-control form-control-sm" name="forNaps" value={formData.forNaps} onChange={handleChange} placeholder="NAPS Details" />
                     </div>
                     <div className="col-md-6">
-                      <label className="form-label text-start d-block fw-semibold">Uniform Allocation</label>
+                      <label className="emp-label">Uniform Allocation</label>
                       <input type="text" className="form-control form-control-sm" name="uniformDetails" value={formData.uniformDetails} onChange={handleChange} placeholder="Uniform Allocation" />
                     </div>
                     <div className="col-12">
-                      <label className="form-label text-start d-block fw-semibold">Specific Deduction Notes</label>
+                      <label className="emp-label">Specific Deduction Notes</label>
                       <input type="text" className="form-control form-control-sm" name="deductionDetails" value={formData.deductionDetails} onChange={handleChange} placeholder="Deduction Notes" />
                     </div>
                     <div className="col-12">
-                      <label className="form-label text-start d-block fw-semibold">General Remarks</label>
+                      <label className="emp-label">General Remarks</label>
                       <textarea className="form-control form-control-sm" name="remarks" value={formData.remarks} onChange={handleChange} rows="3" placeholder="Remarks" />
                     </div>
                   </>
@@ -1714,16 +1716,16 @@ const EmployeeManagement = () => {
 
               </form>
             </div>
-          </div>
 
-          {/* Form Footer */}
-          <div className="card-footer bg-light py-3 d-flex justify-content-end gap-2">
-            <button type="button" className="btn btn-secondary px-4 shadow-sm" onClick={() => setIsModalOpen(false)}>Cancel</button>
-            <button type="submit" form="employeeForm" className="btn btn-primary px-5 shadow-sm fw-bold">
-              {editingId ? 'Update Employee' : 'Submit Registration'}
-            </button>
-          </div>
+            {/* Form Footer */}
+            <div className="emp-card-footer">
+              <button type="button" className="btn btn-secondary px-4 shadow-sm" onClick={() => setIsModalOpen(false)}>Cancel</button>
+              <button type="submit" form="employeeForm" className="btn btn-primary px-5 shadow-sm fw-bold">
+                {editingId ? 'Update Employee' : 'Submit Registration'}
+              </button>
+            </div>
 
+          </div>
         </div>
       )}
     </div>

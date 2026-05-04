@@ -1,0 +1,60 @@
+/* Sidebar.css */
+
+.sidebar-container {
+  width: 270px;
+  min-width: 270px;
+  flex-shrink: 0;
+  background-color: #1e293b;
+  color: white;
+  height: 100vh;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-title {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #38bdf8;
+}
+
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.sidebar-link {
+  text-decoration: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.2s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.9rem;
+}
+
+/* Hover effect for all links */
+.sidebar-link:hover {
+  background-color: rgba(51, 65, 85, 0.5); /* A slightly transparent dark background on hover */
+}
+
+/* State-specific classes applied dynamically in React */
+.sidebar-link.active {
+  color: #38bdf8;
+  background-color: #334155;
+}
+
+.sidebar-link.inactive {
+  color: #cbd5e1;
+  background-color: transparent;
+}
+
+.sidebar-icon {
+  font-size: 1rem;
+}
