@@ -1541,7 +1541,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import api from "../api/axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Plus, Pencil, Trash2, X } from "lucide-react";
+import { Plus, Pencil, Trash2, CalendarDays } from "lucide-react";
 import "./EmployeeManagement.css";
 
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
@@ -1582,10 +1582,11 @@ const emptyEmployeeForm = {
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(emptyEmployeeForm);
+  
   const fileInputRef = useRef(null);
+  const formTopRef = useRef(null);
 
   const fetchEmployees = async () => {
     try {
@@ -1647,16 +1648,18 @@ const EmployeeManagement = () => {
   };
   // --------------------------
 
-  const handleAddNew = () => {
-    setEditingId(null);
-    setFormData(emptyEmployeeForm);
-    setIsModalOpen(true);
-  };
-
   const handleEdit = (employee) => {
     setEditingId(employee.id);
     setFormData({ ...emptyEmployeeForm, ...employee });
-    setIsModalOpen(true);
+    if (formTopRef.current) {
+      formTopRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleResetForm = () => {
+    setEditingId(null);
+    setFormData(emptyEmployeeForm);
+    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleSubmit = async (e) => {
@@ -1667,7 +1670,7 @@ const EmployeeManagement = () => {
       } else {
         await api.post("/employees", formData);
       }
-      setIsModalOpen(false);
+      handleResetForm(); 
       fetchEmployees();
     } catch (error) {
       console.error("Error saving employee:", error);
@@ -1687,246 +1690,267 @@ const EmployeeManagement = () => {
   };
 
   return (
-    <div className="emp-wrapper">
-      {!isModalOpen ? (
-        <div className="emp-list-view">
-          {/* HEADER SECTION */}
-          <div className="d-flex justify-content-between align-items-center mb-4">
-            <div>
-              <h2 className="fw-bold mb-0 text-dark">Employee Management</h2>
-              <p className="text-muted mb-0">Enterprise HR & Payroll Configuration</p>
-            </div>
-            <button onClick={handleAddNew} className="btn btn-primary d-flex align-items-center gap-2 shadow-sm">
-              <Plus size={18} /> Add Employee
+    <div className="emp-wrapper p-4">
+      {/* This embedded style makes the native date picker clickable across 
+        the entire input field while hiding the tiny default browser icon, 
+        allowing our custom Lucide Calendar icon to show perfectly underneath.
+      */}
+      <style>{`
+        .modern-date-input::-webkit-calendar-picker-indicator {
+          background: transparent;
+          bottom: 0;
+          color: transparent;
+          cursor: pointer;
+          height: auto;
+          left: 0;
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: auto;
+        }
+      `}</style>
+
+      {/* HEADER SECTION */}
+      <div className="d-flex justify-content-between align-items-center mb-4" ref={formTopRef}>
+        <div>
+          <h2 className="fw-bold mb-0 text-dark">Employee Management</h2>
+          <p className="text-muted mb-0">Enterprise HR & Payroll Configuration</p>
+        </div>
+      </div>
+
+      {/* --- FORM VIEW (ALWAYS VISIBLE AT TOP) --- */}
+      <div className="emp-form-view mb-5">
+        <div className="emp-card shadow-sm rounded border-0">
+          <div className="emp-card-header rounded-top">
+            <h5 className="mb-0 fw-bold">
+              {editingId ? "Edit Employee Data" : "Employee Registration Form"}
+            </h5>
+          </div>
+
+          <div className="emp-card-body p-4 bg-white">
+            <form id="employeeForm" onSubmit={handleSubmit} className="row g-3">
+              
+              {/* --- 1. PERSONAL INFORMATION --- */}
+              <div className="col-12">
+                <p className="PerInfo m-0 rounded">Personal Information</p>
+              </div>
+
+              <div className="col-12 mb-3 d-flex align-items-center gap-4">
+                <div className="emp-profile-img-container shadow-sm">
+                  <img src={formData.ProfilePictureBase64 || formData.ProfilePicture || DEFAULT_AVATAR} alt="Profile" className="emp-profile-img" />
+                </div>
+                <div>
+                  <label htmlFor="profileUpload" className="btn btn-sm btn-outline-primary me-2 shadow-sm cursor-pointer">
+                    <Plus size={16} className="me-1"/> {formData.ProfilePicture || formData.ProfilePictureBase64 ? 'Change Photo' : 'Upload Photo'}
+                  </label>
+                  <input type="file" id="profileUpload" ref={fileInputRef} accept="image/png, image/jpeg, image/jpg" style={{ display: 'none' }} onChange={handleImageChange} />
+                  
+                  {(formData.ProfilePicture || formData.ProfilePictureBase64) && (
+                    <>
+                      <button type="button" className="btn btn-sm btn-outline-info me-2 shadow-sm" onClick={handleViewImage}>👁️ View</button>
+                      <button type="button" className="btn btn-sm btn-outline-danger shadow-sm" onClick={handleRemoveImage}>Remove</button>
+                    </>
+                  )}
+                  <p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Allowed JPG, PNG. Standard passport format.</p>
+                </div>
+              </div>
+
+              {/* Row 1: Account Name and Father's Name */}
+              <div className="col-md-6">
+                <label className="emp-label">Account Name *</label>
+                <input type="text" className="form-control form-control-sm" name="AcctName" value={formData.AcctName} onChange={handleChange} required placeholder="Full Name" />
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">Father's Name</label>
+                <input type="text" className="form-control form-control-sm" name="FathersName" value={formData.FathersName} onChange={handleChange} placeholder="Father's Name" />
+              </div>
+
+              {/* Row 2: Gender, DOB, Marital Status */}
+              <div className="col-md-4">
+                <label className="emp-label">Gender</label>
+                <select name="Gender" value={formData.Gender} onChange={handleChange} className="form-select form-select-sm">
+                  <option value="M">Male</option>
+                  <option value="F">Female</option>
+                </select>
+              </div>
+
+              {/* === MODERN DATE PICKER COMPONENT === */}
+              <div className="col-md-4">
+                <label className="emp-label">Date of Birth</label>
+                <div className="position-relative">
+                  <input 
+                    type="date" 
+                    className="form-control form-control-sm modern-date-input" 
+                    name="DOB" 
+                    value={formData.DOB} 
+                    onChange={handleChange} 
+                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
+                    style={{ cursor: "pointer", zIndex: 1, position: "relative", backgroundColor: "transparent" }}
+                  />
+                  <CalendarDays 
+                    size={16} 
+                    className="position-absolute text-muted" 
+                    style={{ right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 0 }} 
+                  />
+                </div>
+              </div>
+
+              <div className="col-md-4">
+                <label className="emp-label">Marital Status</label>
+                <select name="MaritalStatus" value={formData.MaritalStatus} onChange={handleChange} className="form-select form-select-sm">
+                  <option value="Single">Single</option>
+                  <option value="Married">Married</option>
+                </select>
+              </div>
+
+
+              {/* --- 2. PERSONAL ADDRESS --- */}
+              <div className="col-12 mt-4">
+                <p className="PerInfo m-0 rounded">Personal Address</p>
+              </div>
+
+              <div className="col-md-6">
+                <label className="emp-label">City/Village</label>
+                <input type="text" className="form-control form-control-sm" name="CityVillage" value={formData.CityVillage} onChange={handleChange} placeholder="City or Village" />
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">Landmark</label>
+                <input type="text" className="form-control form-control-sm" name="Landmark" value={formData.Landmark} onChange={handleChange} placeholder="Landmark" />
+              </div>
+
+              {/* Address Row 2: State, District, Post Office, Police Station, PinCode */}
+              <div className="col-md">
+                <label className="emp-label">State</label>
+                <select name="State" value={formData.State} onChange={handleChange} className="form-select form-select-sm">
+                  <option value="">Choose...</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="West Bengal">West Bengal</option>
+                </select>
+              </div>
+              <div className="col-md">
+                <label className="emp-label">District</label>
+                <input type="text" className="form-control form-control-sm" name="District" value={formData.District} onChange={handleChange} placeholder="District" />
+              </div>
+              <div className="col-md">
+                <label className="emp-label">Post Office</label>
+                <input type="text" className="form-control form-control-sm" name="PostOffice" value={formData.PostOffice} onChange={handleChange} placeholder="Post Office" />
+              </div>
+              <div className="col-md">
+                <label className="emp-label">Police Station</label>
+                <input type="text" className="form-control form-control-sm" name="PolicStation" value={formData.PolicStation} onChange={handleChange} placeholder="Police Station" />
+              </div>
+              <div className="col-md">
+                <label className="emp-label">Pin Code</label>
+                <input type="text" className="form-control form-control-sm" name="PinCode" value={formData.PinCode} onChange={handleChange} placeholder="Pin Code" />
+              </div>
+
+
+              {/* --- 3. IDENTITY --- */}
+              <div className="col-12 mt-4">
+                <p className="PerInfo m-0 rounded">Identity</p>
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">PAN No</label>
+                <input type="text" className="form-control form-control-sm" name="PanNo" value={formData.PanNo} onChange={handleChange} placeholder="PAN No" />
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Aadhar No</label>
+                <input type="text" className="form-control form-control-sm" name="AadharNo" value={formData.AadharNo} onChange={handleChange} placeholder="Aadhar No" />
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Voter No</label>
+                <input type="text" className="form-control form-control-sm" name="VoterNo" value={formData.VoterNo} onChange={handleChange} placeholder="Voter No" />
+              </div>
+
+
+              {/* --- 4. BANK INFORMATION --- */}
+              <div className="col-12 mt-4">
+                <p className="PerInfo m-0 rounded">Bank Information</p>
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">Bank Name</label>
+                <input type="text" className="form-control form-control-sm" name="BankName" value={formData.BankName} onChange={handleChange} placeholder="Bank Name" />
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">Bank Address</label>
+                <input type="text" className="form-control form-control-sm" name="BankAddress" value={formData.BankAddress} onChange={handleChange} placeholder="Bank Address" />
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">IFS Code</label>
+                <input type="text" className="form-control form-control-sm" name="IFSCode" value={formData.IFSCode} onChange={handleChange} placeholder="IFS Code" />
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">Account Number</label>
+                <input type="text" className="form-control form-control-sm" name="AcctNo" value={formData.AcctNo} onChange={handleChange} placeholder="Account Number" />
+              </div>
+
+            </form>
+          </div>
+
+          {/* Form Footer */}
+          <div className="emp-card-footer rounded-bottom bg-light border-top p-3 d-flex justify-content-end gap-2">
+            <button type="button" className="btn btn-secondary px-4 shadow-sm" onClick={handleResetForm}>
+              {editingId ? "Cancel Edit" : "Clear Form"}
+            </button>
+            <button type="submit" form="employeeForm" className="btn btn-primary px-5 shadow-sm fw-bold">
+              {editingId ? "Update Employee" : "Submit Registration"}
             </button>
           </div>
+        </div>
+      </div>
 
-          {/* DATA TABLE */}
-          <div className="card shadow-sm border-0">
-            <div className="card-body p-0 table-responsive">
-              <table className="table table-hover align-middle mb-0">
-                <thead className="table-light text-uppercase" style={{ fontSize: "0.85rem" }}>
+      {/* --- TABLE VIEW (ALWAYS VISIBLE AT BOTTOM) --- */}
+      <div className="emp-list-view">
+        <h4 className="fw-bold text-dark mb-3">Registered Employees Directory</h4>
+        <div className="card shadow-sm border-0">
+          <div className="card-body p-0 table-responsive">
+            <table className="table table-hover align-middle mb-0 bg-white">
+              <thead className="table-light text-uppercase" style={{ fontSize: "0.85rem" }}>
+                <tr>
+                  <th className="py-3 ps-4">Profile</th>
+                  <th className="py-3">Emp ID</th>
+                  <th className="py-3">Name</th>
+                  <th className="py-3 text-end pe-4">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {employees.length === 0 ? (
                   <tr>
-                    <th className="py-3 ps-4">Profile</th>
-                    <th className="py-3">Emp ID</th>
-                    <th className="py-3">Name</th>
-                    <th className="py-3">Status</th>
-                    <th className="py-3 text-end pe-4">Actions</th>
+                    <td colSpan="4" className="text-center py-5 text-muted fw-bold">
+                      No active employees found. Please register an employee above.
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {employees.length === 0 ? (
-                    <tr>
-                      <td colSpan="5" className="text-center py-5 text-muted fw-bold">
-                        No active employees found.
+                ) : (
+                  employees.map((emp) => (
+                    <tr key={emp.id}>
+                      <td className="ps-4">
+                        <img 
+                          src={emp.ProfilePictureBase64 || DEFAULT_AVATAR} 
+                          alt="avatar" 
+                          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #dee2e6' }}
+                        />
+                      </td>
+                      <td className="text-primary fw-bold">{emp.AcctId || "N/A"}</td>
+                      <td className="fw-bold text-dark">{emp.AcctName}</td>
+                      <td className="text-end pe-4">
+                        <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary me-2">
+                          <Pencil size={14} className="me-1" /> Edit
+                        </button>
+                        <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger">
+                          <Trash2 size={14} className="me-1" /> Delete
+                        </button>
                       </td>
                     </tr>
-                  ) : (
-                    employees.map((emp) => (
-                      <tr key={emp.id}>
-                        <td className="ps-4">
-                          <img 
-                            src={emp.ProfilePictureBase64 || DEFAULT_AVATAR} 
-                            alt="avatar" 
-                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #dee2e6' }}
-                          />
-                        </td>
-                        <td className="text-primary fw-bold">{emp.AcctId || "N/A"}</td>
-                        <td className="fw-bold text-dark">{emp.AcctName}</td>
-                        <td>
-                          <span className={`badge ${emp.status === "Available" ? "bg-success" : "bg-warning text-dark"}`}>
-                            {emp.status}
-                          </span>
-                        </td>
-                        <td className="text-end pe-4">
-                          <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary me-2">
-                            <Pencil size={14} className="me-1" /> Edit
-                          </button>
-                          <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger">
-                            <Trash2 size={14} className="me-1" /> Delete
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
-      ) : (
-        /* IN-PAGE FORM VIEW (Client's Continuous Scroll Layout) */
-        <div className="emp-form-view">
-          <div className="emp-card">
-            
-            {/* Form Header */}
-            <div className="emp-card-header">
-              <h5 className="mb-0 fw-bold">
-                {editingId ? "Edit Employee Data" : "Employee Registration Form"}
-              </h5>
-              <button type="button" className="btn-close btn-close-white" onClick={() => setIsModalOpen(false)} aria-label="Close"></button>
-            </div>
-
-            {/* Form Body */}
-            <div className="emp-card-body">
-              <form id="employeeForm" onSubmit={handleSubmit} className="row g-3">
-                
-                {/* --- 1. PERSONAL INFORMATION --- */}
-                <div className="col-12">
-                  <p className="PerInfo">1. Personal Information</p>
-                </div>
-
-                <div className="col-12 mb-3 d-flex align-items-center gap-4">
-                  <div className="emp-profile-img-container shadow-sm">
-                    <img src={formData.ProfilePictureBase64 || formData.ProfilePicture || DEFAULT_AVATAR} alt="Profile" className="emp-profile-img" />
-                  </div>
-                  <div>
-                    <label htmlFor="profileUpload" className="btn btn-sm btn-outline-primary me-2 shadow-sm cursor-pointer">
-                      <Plus size={16} className="me-1"/> {formData.ProfilePicture || formData.ProfilePictureBase64 ? 'Change Photo' : 'Upload Photo'}
-                    </label>
-                    <input type="file" id="profileUpload" ref={fileInputRef} accept="image/png, image/jpeg, image/jpg" style={{ display: 'none' }} onChange={handleImageChange} />
-                    
-                    {(formData.ProfilePicture || formData.ProfilePictureBase64) && (
-                      <>
-                        <button type="button" className="btn btn-sm btn-outline-info me-2 shadow-sm" onClick={handleViewImage}>👁️ View</button>
-                        <button type="button" className="btn btn-sm btn-outline-danger shadow-sm" onClick={handleRemoveImage}>Remove</button>
-                      </>
-                    )}
-                    <p className="text-muted mt-2 mb-0" style={{ fontSize: '0.8rem' }}>Allowed JPG, PNG. Standard passport format.</p>
-                  </div>
-                </div>
-
-                {/* ROW 1: Account Name and Father's Name */}
-                <div className="col-md-6">
-                  <label className="emp-label">Account Name *</label>
-                  <input type="text" className="form-control form-control-sm" name="AcctName" value={formData.AcctName} onChange={handleChange} required placeholder="Full Name" />
-                </div>
-                <div className="col-md-6">
-                  <label className="emp-label">Father's Name</label>
-                  <input type="text" className="form-control form-control-sm" name="FathersName" value={formData.FathersName} onChange={handleChange} placeholder="Father's Name" />
-                </div>
-
-                {/* ROW 2: Gender, DOB, Marital Status */}
-                <div className="col-md-4">
-                  <label className="emp-label">Gender</label>
-                  <select name="Gender" value={formData.Gender} onChange={handleChange} className="form-select form-select-sm">
-                    <option value="M">Male</option>
-                    <option value="F">Female</option>
-                    {/* <option value="Other">Other</option> */}
-                  </select>
-                </div>
-                <div className="col-md-4">
-                  <label className="emp-label">Date of Birth</label>
-                  <input type="date" className="form-control form-control-sm" name="DOB" value={formData.DOB} onChange={handleChange} />
-                </div>
-                <div className="col-md-4">
-                  <label className="emp-label">Marital Status</label>
-                  <select name="MaritalStatus" value={formData.MaritalStatus} onChange={handleChange} className="form-select form-select-sm">
-                    <option value="Single">Single</option>
-                    <option value="Married">Married</option>
-                    {/* <option value="Other">Other</option> */}
-                  </select>
-                </div>
-
-
-                {/* --- 2. PERSONAL ADDRESS --- */}
-                <div className="col-12 mt-4">
-                  <p className="AddInfo">2. Personal Address</p>
-                </div>
-
-                {/* Address Row 1 */}
-                <div className="col-md-6">
-                  <label className="emp-label">City/Village</label>
-                  <input type="text" className="form-control form-control-sm" name="CityVillage" value={formData.CityVillage} onChange={handleChange} placeholder="City or Village" />
-                </div>
-                <div className="col-md-6">
-                  <label className="emp-label">Landmark</label>
-                  <input type="text" className="form-control form-control-sm" name="Landmark" value={formData.Landmark} onChange={handleChange} placeholder="Landmark" />
-                </div>
-
-                {/* Address Row 2: ALL 5 FIELDS IN ONE ROW */}
-                <div className="col-md">
-                  <label className="emp-label">State</label>
-                  <select name="State" value={formData.State} onChange={handleChange} className="form-select form-select-sm">
-                    <option value="">Choose...</option>
-                    <option value="Delhi">Delhi</option>
-                    <option value="Maharashtra">Maharashtra</option>
-                    <option value="Karnataka">Karnataka</option>
-                    <option value="West Bengal">West Bengal</option>
-                  </select>
-                </div>
-                <div className="col-md">
-                  <label className="emp-label">District</label>
-                  <input type="text" className="form-control form-control-sm" name="District" value={formData.District} onChange={handleChange} placeholder="District" />
-                </div>
-                <div className="col-md">
-                  <label className="emp-label">Post Office</label>
-                  <input type="text" className="form-control form-control-sm" name="PostOffice" value={formData.PostOffice} onChange={handleChange} placeholder="Post Office" />
-                </div>
-                <div className="col-md">
-                  <label className="emp-label">Police Station</label>
-                  <input type="text" className="form-control form-control-sm" name="PolicStation" value={formData.PolicStation} onChange={handleChange} placeholder="Police Station" />
-                </div>
-                <div className="col-md">
-                  <label className="emp-label">Pin Code</label>
-                  <input type="text" className="form-control form-control-sm" name="PinCode" value={formData.PinCode} onChange={handleChange} placeholder="Pin Code" />
-                </div>
-
-
-                {/* --- 3. IDENTITY --- */}
-                <div className="col-12 mt-4">
-                  <p className="AddInfo" style={{ backgroundColor: '#28a745' }}>3. Identity</p>
-                </div>
-                <div className="col-md-4">
-                  <label className="emp-label">PAN No</label>
-                  <input type="text" className="form-control form-control-sm" name="PanNo" value={formData.PanNo} onChange={handleChange} placeholder="PAN No" />
-                </div>
-                <div className="col-md-4">
-                  <label className="emp-label">Aadhar No</label>
-                  <input type="text" className="form-control form-control-sm" name="AadharNo" value={formData.AadharNo} onChange={handleChange} placeholder="Aadhar No" />
-                </div>
-                <div className="col-md-4">
-                  <label className="emp-label">Voter No</label>
-                  <input type="text" className="form-control form-control-sm" name="VoterNo" value={formData.VoterNo} onChange={handleChange} placeholder="Voter No" />
-                </div>
-
-
-                {/* --- 4. BANK INFORMATION --- */}
-                <div className="col-12 mt-4">
-                  <p className="AddInfo" style={{ backgroundColor: '#ffc107', color: '#000' }}>4. Bank Information</p>
-                </div>
-                <div className="col-md-6">
-                  <label className="emp-label">Bank Name</label>
-                  <input type="text" className="form-control form-control-sm" name="BankName" value={formData.BankName} onChange={handleChange} placeholder="Bank Name" />
-                </div>
-                <div className="col-md-6">
-                  <label className="emp-label">Bank Address</label>
-                  <input type="text" className="form-control form-control-sm" name="BankAddress" value={formData.BankAddress} onChange={handleChange} placeholder="Bank Address" />
-                </div>
-                <div className="col-md-6">
-                  <label className="emp-label">IFS Code</label>
-                  <input type="text" className="form-control form-control-sm" name="IFSCode" value={formData.IFSCode} onChange={handleChange} placeholder="IFS Code" />
-                </div>
-                <div className="col-md-6">
-                  <label className="emp-label">Account Number (AcctNo)</label>
-                  <input type="text" className="form-control form-control-sm" name="AcctNo" value={formData.AcctNo} onChange={handleChange} placeholder="Account Number" />
-                </div>
-
-              </form>
-            </div>
-
-            {/* Form Footer */}
-            <div className="emp-card-footer">
-              <button type="button" className="btn btn-secondary px-4 shadow-sm" onClick={() => setIsModalOpen(false)}>
-                Cancel
-              </button>
-              <button type="submit" form="employeeForm" className="btn btn-primary px-5 shadow-sm fw-bold">
-                {editingId ? "Update Employee" : "Submit Registration"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      </div>
+      
     </div>
   );
 };
