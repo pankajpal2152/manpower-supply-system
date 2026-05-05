@@ -6,6 +6,7 @@ import Dashboard from './pages/Dashboard';
 import Layout from './components/Layout';
 import UserManagement from './pages/UserManagement';
 import EmployeeManagement from './pages/EmployeeManagement';
+import ClientManagement from './pages/ClientManagement'; // <-- NEW IMPORT ADDED HERE
 
 function App() {
   return (
@@ -25,8 +26,10 @@ function App() {
           <Route path="/employees" element={<EmployeeManagement />} /> 
           <Route path="/users" element={<UserManagement />} /> 
           
+          {/* NEW: Client Management Route actively linked! */}
+          <Route path="/clients" element={<ClientManagement />} /> 
+          
           {/* Placeholders for future modules - added slight padding for better appearance */}
-          <Route path="/clients" element={<div style={{ padding: '20px' }}><h2>Client Management</h2><p>Coming soon...</p></div>} />
           <Route path="/jobs" element={<div style={{ padding: '20px' }}><h2>Job Management</h2><p>Coming soon...</p></div>} />
           <Route path="/payroll" element={<div style={{ padding: '20px' }}><h2>Payroll System</h2><p>Coming soon...</p></div>} />
           <Route path="/invoices" element={<div style={{ padding: '20px' }}><h2>Invoice System</h2><p>Coming soon...</p></div>} />

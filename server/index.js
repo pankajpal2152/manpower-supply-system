@@ -11,6 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 const permissionRoutes = require('./routes/permissionRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const clientRoutes = require('./routes/clientRoutes');
 
 const app = express();
 
@@ -43,7 +44,7 @@ const startServer = async () => {
     app.use('/api/permissions', permissionRoutes);
     app.use('/api/employees', employeeRoutes);
     app.use('/api/dashboard', dashboardRoutes);
-    
+    app.use('/api/clients', clientRoutes);
     // Test Route
     app.get('/api/test', (req, res) => {
       res.json({ message: 'Welcome to the Manpower Supply System API!' });
