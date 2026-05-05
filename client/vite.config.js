@@ -5,6 +5,7 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 3000,
+    open: true, // <-- Add this line to automatically open the browser
     proxy: {
       // This catches any request starting with /api and sends it to port 5000
       '/api': {
