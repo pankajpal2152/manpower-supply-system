@@ -1,45 +1,30 @@
 // controllers/employeeController.js
-const { Employee, EmployeeOffice, EmployeeStatutory, EmployeeFamily, Document } = require('../models');
+const { Employee, Document } = require('../models');
 
-// Helper function to strip out table-specific IDs so they don't overwrite the main Employee ID
-const sanitizeNested = (nestedObj) => {
-    if (!nestedObj) return {};
-    const { id, employeeId, createdAt, updatedAt, ...rest } = nestedObj;
-    return rest;
-};
-
-// Fetch ONLY active employees with ALL nested data AND Profile Picture Document
+// Fetch ONLY active employees AND Profile Picture Document
 exports.getAllEmployees = async (req, res) => {
   try {
     const employees = await Employee.findAll({
       where: { isActive: true },
       include: [
-        { model: EmployeeOffice, as: 'officeInfo' },
-        { model: EmployeeStatutory, as: 'statutoryInfo' },
-        { model: EmployeeFamily, as: 'familyInfo' },
         { model: Document, as: 'documents', required: false, where: { documentType: 'Profile Picture' } }
       ],
       order: [['createdAt', 'DESC']]
     });
 
-    // Flatten the nested objects so the frontend form receives flat data
     const flattenedEmployees = employees.map(emp => {
       const plainEmp = emp.get({ plain: true });
       
-      let profileImageBase64 = '';
+      let ProfilePictureBase64 = '';
       if (plainEmp.documents && plainEmp.documents.length > 0) {
-          profileImageBase64 = plainEmp.documents[0].documentData;
+          ProfilePictureBase64 = plainEmp.documents[0].documentData;
       }
 
-      // Destructure out the nested objects so we can merge them safely
-      const { officeInfo, statutoryInfo, familyInfo, documents, ...coreEmployee } = plainEmp;
+      const { documents, ...coreEmployee } = plainEmp;
 
       return {
         ...coreEmployee,
-        ...sanitizeNested(officeInfo),      // Safely merge without overwriting `id`
-        ...sanitizeNested(statutoryInfo),
-        ...sanitizeNested(familyInfo),
-        profileImageBase64
+        ProfilePictureBase64
       };
     });
 
@@ -50,7 +35,7 @@ exports.getAllEmployees = async (req, res) => {
   }
 };
 
-// Create a new employee across all tables + Document table
+// Create a new employee with an Auto-Generated Employee ID (AcctId)
 exports.createEmployee = async (req, res) => {
   try {
     const data = req.body;
@@ -58,27 +43,28 @@ exports.createEmployee = async (req, res) => {
     // 1. Create Core Employee 
     const newEmployee = await Employee.create(data);
 
-    // 2. Handle Profile Image Document Storage
-    if (data.profileImageBase64 && data.profileImageBase64.startsWith('data:image')) {
-      const docName = `EMP_${newEmployee.id}_${data.firstName}_${data.lastName}_Profile`;
+    // 2. Auto-Generate AcctId (Employee ID) based on the database primary key
+    // This will generate an ID like "EMP0001", "EMP0002", etc.
+    const generatedAcctId = `EMP${String(newEmployee.id).padStart(4, '0')}`;
+    
+    // 3. Handle Profile Image Document Storage
+    let docName = null;
+    if (data.ProfilePictureBase64 && data.ProfilePictureBase64.startsWith('data:image')) {
+      docName = `EMP_${newEmployee.id}_${data.AcctName}_Profile`;
       
       await Document.create({
         documentName: docName,
         documentType: 'Profile Picture',
-        documentData: data.profileImageBase64,
+        documentData: data.ProfilePictureBase64,
         employeeId: newEmployee.id
       });
-
-      // Update the core employee table with just the reference name
-      await newEmployee.update({ profileImage: docName });
     }
 
-    // 3. Create nested records (Sanitized to prevent accidental ID insertion)
-    const safeData = sanitizeNested(data);
-
-    await EmployeeOffice.create({ ...safeData, employeeId: newEmployee.id });
-    await EmployeeStatutory.create({ ...safeData, employeeId: newEmployee.id });
-    await EmployeeFamily.create({ ...safeData, employeeId: newEmployee.id });
+    // 4. Update the newly created row with the generated AcctId and Document name
+    await newEmployee.update({ 
+      AcctId: generatedAcctId, 
+      ProfilePicture: docName 
+    });
 
     res.status(201).json(newEmployee);
   } catch (error) {
@@ -87,51 +73,35 @@ exports.createEmployee = async (req, res) => {
   }
 };
 
-// Update an employee across all tables + Document table
+// Update an employee
 exports.updateEmployee = async (req, res) => {
   try {
     const empId = parseInt(req.params.id, 10);
     const data = req.body;
 
-    // Remove primary keys from the incoming payload so Sequelize doesn't try to update them
-    const safeUpdateData = sanitizeNested(data);
-
     // Handle Profile Image Updates/Deletions
-    if (data.profileImageBase64 !== undefined) {
-      if (data.profileImageBase64 === '') {
-        // User removed the image - delete from Document table and nullify reference
+    if (data.ProfilePictureBase64 !== undefined) {
+      if (data.ProfilePictureBase64 === '') {
         await Document.destroy({ where: { employeeId: empId, documentType: 'Profile Picture' } });
-        safeUpdateData.profileImage = null;
-      } else if (data.profileImageBase64.startsWith('data:image')) {
-        // User uploaded a NEW image
-        const docName = `EMP_${empId}_${data.firstName}_${data.lastName}_Profile`;
+        data.ProfilePicture = null;
+      } else if (data.ProfilePictureBase64.startsWith('data:image')) {
+        const docName = `EMP_${empId}_${data.AcctName}_Profile`;
         
         const existingDoc = await Document.findOne({ where: { employeeId: empId, documentType: 'Profile Picture' }});
         if (existingDoc) {
-            await existingDoc.update({ documentData: data.profileImageBase64, documentName: docName });
+            await existingDoc.update({ documentData: data.ProfilePictureBase64, documentName: docName });
         } else {
-            await Document.create({ documentName: docName, documentType: 'Profile Picture', documentData: data.profileImageBase64, employeeId: empId });
+            await Document.create({ documentName: docName, documentType: 'Profile Picture', documentData: data.ProfilePictureBase64, employeeId: empId });
         }
-        safeUpdateData.profileImage = docName;
+        data.ProfilePicture = docName;
       }
     }
 
-    // Update Core Employee
-    await Employee.update(safeUpdateData, { where: { id: empId } });
+    // Protect AcctId from being overwritten by a blank form value during an update
+    delete data.AcctId;
+
+    await Employee.update(data, { where: { id: empId } });
     
-    // Update or Create sub-records (Using findOne + update is much safer than upsert here)
-    const office = await EmployeeOffice.findOne({ where: { employeeId: empId } });
-    if (office) await office.update(safeUpdateData);
-    else await EmployeeOffice.create({ ...safeUpdateData, employeeId: empId });
-
-    const statutory = await EmployeeStatutory.findOne({ where: { employeeId: empId } });
-    if (statutory) await statutory.update(safeUpdateData);
-    else await EmployeeStatutory.create({ ...safeUpdateData, employeeId: empId });
-
-    const family = await EmployeeFamily.findOne({ where: { employeeId: empId } });
-    if (family) await family.update(safeUpdateData);
-    else await EmployeeFamily.create({ ...safeUpdateData, employeeId: empId });
-
     res.status(200).json({ message: 'Employee updated successfully' });
   } catch (error) {
     console.error('Update Error:', error);
