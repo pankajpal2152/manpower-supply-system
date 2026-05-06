@@ -1,10 +1,10 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
-const Client = sequelize.define('Client', {
-  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }, // Core ID for system relationships
+const Job = sequelize.define('Job', {
+  id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true }, 
   
-  // 1. Client Information
+  // 1. Branch Office / Basic Info
   AcctId: { type: DataTypes.STRING, allowNull: true },
   ProfilePicture: { type: DataTypes.STRING, allowNull: true }, // Stores Document Name
   AccountName: { type: DataTypes.STRING, allowNull: false },
@@ -28,8 +28,8 @@ const Client = sequelize.define('Client', {
   status: { type: DataTypes.STRING, defaultValue: 'Available' },
   isActive: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true }
 }, {
-  tableName: 'clients',
+  tableName: 'jobs',
   timestamps: true,
 });
 
-module.exports = Client;
+module.exports = Job;

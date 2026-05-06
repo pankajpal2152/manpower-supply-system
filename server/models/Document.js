@@ -1,4 +1,3 @@
-// models/Document.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
@@ -6,11 +5,14 @@ const Document = sequelize.define('Document', {
   id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
   documentName: { type: DataTypes.STRING, allowNull: false },
   documentType: { type: DataTypes.STRING, allowNull: false },
-  // Using TEXT('long') is crucial for storing large Base64 image strings
   documentData: { type: DataTypes.TEXT('long'), allowNull: false },
-  employeeId: { type: DataTypes.INTEGER, allowNull: false }
+  
+  // Allowing nulls so a document can belong to an Employee, Client, OR Job
+  employeeId: { type: DataTypes.INTEGER, allowNull: true },
+  clientId: { type: DataTypes.INTEGER, allowNull: true },
+  jobId: { type: DataTypes.INTEGER, allowNull: true } // <-- NEW FOR JOB MANAGEMENT
 }, {
-  tableName: 'AllUploadDocuments', // <-- UPDATED TABLE NAME
+  tableName: 'AllUploadDocuments', 
   timestamps: true,
 });
 

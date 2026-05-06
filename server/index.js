@@ -12,7 +12,7 @@ const permissionRoutes = require('./routes/permissionRoutes');
 const employeeRoutes = require('./routes/employeeRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const clientRoutes = require('./routes/clientRoutes');
-
+const jobRoutes = require('./routes/jobRoutes');
 const app = express();
 
 // Middleware
@@ -39,6 +39,7 @@ const startServer = async () => {
     console.log('✅ Database models synchronized successfully.');
 
     // 4. Register Routes
+    app.use('/api/jobs', jobRoutes);
     app.use('/api/auth', authRoutes);
     app.use('/api/users', userRoutes);
     app.use('/api/permissions', permissionRoutes);
