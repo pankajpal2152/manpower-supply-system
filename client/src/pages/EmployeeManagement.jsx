@@ -1538,10 +1538,10 @@
 
 
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import api from "../api/axios";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Plus, Pencil, Trash2, CalendarDays } from "lucide-react";
+import { Plus, Pencil, Trash2, CalendarDays, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import "./EmployeeManagement.css";
 
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
@@ -1582,8 +1582,17 @@ const emptyEmployeeForm = {
 
 const EmployeeManagement = () => {
   const [employees, setEmployees] = useState([]);
+  const [filteredEmployees, setFilteredEmployees] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(emptyEmployeeForm);
+  
+  // ✅ States for Dropdowns
+  const [dbStates, setDbStates] = useState([]);
+  const [dbDistricts, setDbDistricts] = useState([]);
+
+  // --- SORTING STATE ---
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   
   const fileInputRef = useRef(null);
   const formTopRef = useRef(null);
@@ -1592,20 +1601,136 @@ const EmployeeManagement = () => {
     try {
       const response = await api.get("/employees");
       setEmployees(response.data);
+      setFilteredEmployees(response.data);
     } catch (error) {
       console.error("Error fetching employees:", error);
     }
   };
 
+  // ✅ Fetch states on mount
   useEffect(() => {
     fetchEmployees();
+    
+    const fetchStates = async () => {
+        try {
+            const res = await api.get("/employees/data/states");
+            setDbStates(res.data);
+        } catch (error) {
+            console.error("Error fetching states:", error);
+        }
+    };
+    fetchStates();
   }, []);
 
+  // ✅ Fetch districts dynamically when State changes
+  useEffect(() => {
+    if (formData.State) {
+        // Find the StateId corresponding to the selected StateName
+        const matchedState = dbStates.find(s => s.StateName === formData.State);
+        if (matchedState) {
+            const fetchDistricts = async () => {
+                try {
+                    const res = await api.get(`/employees/data/districts/${matchedState.StateId}`);
+                    setDbDistricts(res.data);
+                } catch (error) {
+                    console.error("Error fetching districts:", error);
+                }
+            };
+            fetchDistricts();
+        } else {
+            setDbDistricts([]);
+        }
+    } else {
+        setDbDistricts([]);
+    }
+  }, [formData.State, dbStates]);
+
+  // --- Lightning Fast Live Search Logic ---
+  useEffect(() => {
+    if (!searchTerm.trim()) {
+      setFilteredEmployees(employees);
+      return;
+    }
+
+    const lowercasedSearch = searchTerm.toLowerCase();
+    
+    const filtered = employees.filter((emp) => {
+      const { ProfilePictureBase64, ProfilePicture, id, createdAt, updatedAt, ...searchableData } = emp;
+
+      return Object.values(searchableData).some((value) => 
+        value !== null && 
+        value !== undefined && 
+        value.toString().toLowerCase().includes(lowercasedSearch)
+      );
+    });
+
+    setFilteredEmployees(filtered);
+  }, [searchTerm, employees]);
+
+  // --- COLUMN SORTING LOGIC ---
+  const handleSort = (key) => {
+    let direction = 'ascending';
+    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
+      direction = 'descending';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedEmployees = useMemo(() => {
+    let sortableItems = [...filteredEmployees];
+    if (sortConfig.key !== null) {
+      sortableItems.sort((a, b) => {
+        const valA = a[sortConfig.key] || "";
+        const valB = b[sortConfig.key] || "";
+        
+        if (valA < valB) return sortConfig.direction === 'ascending' ? -1 : 1;
+        if (valA > valB) return sortConfig.direction === 'ascending' ? 1 : -1;
+        return 0;
+      });
+    }
+    return sortableItems;
+  }, [filteredEmployees, sortConfig]);
+
+  const renderSortIcon = (columnName) => {
+    if (sortConfig.key !== columnName) return <ArrowUpDown size={14} className="ms-1 text-muted" />;
+    if (sortConfig.direction === 'ascending') return <ArrowUp size={14} className="ms-1 text-primary" />;
+    return <ArrowDown size={14} className="ms-1 text-primary" />;
+  };
+
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
+    let { name, value, type, checked } = e.target;
+
+    // --- Input Limitations & Filtering ---
+    if (["AcctName", "FathersName"].includes(name)) {
+      value = value.replace(/[^a-zA-Z\s.]/g, "");
+    }
+    if (name === "PinCode") {
+      value = value.replace(/\D/g, "").slice(0, 6);
+    }
+    if (name === "AadharNo") {
+      value = value.replace(/\D/g, "").slice(0, 12);
+    }
+    if (name === "PanNo") {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+    }
+    if (name === "VoterNo") {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+    }
+    if (name === "IFSCode") {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11);
+    }
+    if (name === "AcctNo") {
+      value = value.replace(/\D/g, "").slice(0, 18);
+    }
+
+    setFormData(prev => {
+      const updatedData = { ...prev, [name]: type === "checkbox" ? checked : value };
+      
+      // ✅ Reset District field if State is changed to prevent invalid combinations
+      if (name === "State") {
+          updatedData.District = "";
+      }
+      return updatedData;
     });
   };
 
@@ -1646,7 +1771,6 @@ const EmployeeManagement = () => {
       alert("Pop-up blocked! Please allow pop-ups to view the image.");
     }
   };
-  // --------------------------
 
   const handleEdit = (employee) => {
     setEditingId(employee.id);
@@ -1691,10 +1815,6 @@ const EmployeeManagement = () => {
 
   return (
     <div className="emp-wrapper p-4">
-      {/* This embedded style makes the native date picker clickable across 
-        the entire input field while hiding the tiny default browser icon, 
-        allowing our custom Lucide Calendar icon to show perfectly underneath.
-      */}
       <style>{`
         .modern-date-input::-webkit-calendar-picker-indicator {
           background: transparent;
@@ -1707,6 +1827,10 @@ const EmployeeManagement = () => {
           right: 0;
           top: 0;
           width: auto;
+        }
+        .sortable-header:hover {
+          background-color: #e9ecef !important;
+          transition: background-color 0.2s;
         }
       `}</style>
 
@@ -1758,11 +1882,30 @@ const EmployeeManagement = () => {
               {/* Row 1: Account Name and Father's Name */}
               <div className="col-md-6">
                 <label className="emp-label">Account Name *</label>
-                <input type="text" className="form-control form-control-sm" name="AcctName" value={formData.AcctName} onChange={handleChange} required placeholder="Full Name" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="AcctName" 
+                  value={formData.AcctName} 
+                  onChange={handleChange} 
+                  required 
+                  placeholder="Full Name" 
+                  pattern="^[a-zA-Z\s.]+$"
+                  title="Name can only contain letters and spaces"
+                />
               </div>
               <div className="col-md-6">
                 <label className="emp-label">Father's Name</label>
-                <input type="text" className="form-control form-control-sm" name="FathersName" value={formData.FathersName} onChange={handleChange} placeholder="Father's Name" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="FathersName" 
+                  value={formData.FathersName} 
+                  onChange={handleChange} 
+                  placeholder="Father's Name" 
+                  pattern="^[a-zA-Z\s.]+$"
+                  title="Name can only contain letters and spaces"
+                />
               </div>
 
               {/* Row 2: Gender, DOB, Marital Status */}
@@ -1774,7 +1917,6 @@ const EmployeeManagement = () => {
                 </select>
               </div>
 
-              {/* === MODERN DATE PICKER COMPONENT === */}
               <div className="col-md-4">
                 <label className="emp-label">Date of Birth</label>
                 <div className="position-relative">
@@ -1803,7 +1945,6 @@ const EmployeeManagement = () => {
                 </select>
               </div>
 
-
               {/* --- 2. PERSONAL ADDRESS --- */}
               <div className="col-12 mt-4">
                 <p className="PerInfo m-0 rounded">Personal Address</p>
@@ -1818,20 +1959,34 @@ const EmployeeManagement = () => {
                 <input type="text" className="form-control form-control-sm" name="Landmark" value={formData.Landmark} onChange={handleChange} placeholder="Landmark" />
               </div>
 
-              {/* Address Row 2: State, District, Post Office, Police Station, PinCode */}
+              {/* Address Row 2: ✅ DYNAMIC State and District */}
               <div className="col-md">
                 <label className="emp-label">State</label>
                 <select name="State" value={formData.State} onChange={handleChange} className="form-select form-select-sm">
-                  <option value="">Choose...</option>
-                  <option value="Delhi">Delhi</option>
-                  <option value="Maharashtra">Maharashtra</option>
-                  <option value="Karnataka">Karnataka</option>
-                  <option value="West Bengal">West Bengal</option>
+                  <option value="">Select State...</option>
+                  {dbStates.map((state) => (
+                    <option key={state.StateId} value={state.StateName}>
+                        {state.StateName}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="col-md">
                 <label className="emp-label">District</label>
-                <input type="text" className="form-control form-control-sm" name="District" value={formData.District} onChange={handleChange} placeholder="District" />
+                <select 
+                    name="District" 
+                    value={formData.District} 
+                    onChange={handleChange} 
+                    className="form-select form-select-sm"
+                    disabled={!formData.State}
+                >
+                  <option value="">Select District...</option>
+                  {dbDistricts.map((dist) => (
+                    <option key={dist.DistId} value={dist.DistName}>
+                        {dist.DistName}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="col-md">
                 <label className="emp-label">Post Office</label>
@@ -1843,9 +1998,17 @@ const EmployeeManagement = () => {
               </div>
               <div className="col-md">
                 <label className="emp-label">Pin Code</label>
-                <input type="text" className="form-control form-control-sm" name="PinCode" value={formData.PinCode} onChange={handleChange} placeholder="Pin Code" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="PinCode" 
+                  value={formData.PinCode} 
+                  onChange={handleChange} 
+                  placeholder="Pin Code" 
+                  pattern="^[1-9][0-9]{5}$"
+                  title="PIN code must be exactly 6 digits and cannot start with 0"
+                />
               </div>
-
 
               {/* --- 3. IDENTITY --- */}
               <div className="col-12 mt-4">
@@ -1853,17 +2016,43 @@ const EmployeeManagement = () => {
               </div>
               <div className="col-md-4">
                 <label className="emp-label">PAN No</label>
-                <input type="text" className="form-control form-control-sm" name="PanNo" value={formData.PanNo} onChange={handleChange} placeholder="PAN No" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="PanNo" 
+                  value={formData.PanNo} 
+                  onChange={handleChange} 
+                  placeholder="PAN No" 
+                  pattern="^[A-Z]{5}[0-9]{4}[A-Z]{1}$"
+                  title="Format: 5 Letters, 4 Numbers, 1 Letter (e.g., ABCDE1234F)"
+                />
               </div>
               <div className="col-md-4">
                 <label className="emp-label">Aadhar No</label>
-                <input type="text" className="form-control form-control-sm" name="AadharNo" value={formData.AadharNo} onChange={handleChange} placeholder="Aadhar No" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="AadharNo" 
+                  value={formData.AadharNo} 
+                  onChange={handleChange} 
+                  placeholder="Aadhar No" 
+                  pattern="^\d{12}$"
+                  title="Must be exactly 12 digits"
+                />
               </div>
               <div className="col-md-4">
                 <label className="emp-label">Voter No</label>
-                <input type="text" className="form-control form-control-sm" name="VoterNo" value={formData.VoterNo} onChange={handleChange} placeholder="Voter No" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="VoterNo" 
+                  value={formData.VoterNo} 
+                  onChange={handleChange} 
+                  placeholder="Voter No" 
+                  pattern="^[A-Z]{3}[0-9]{7}$"
+                  title="Format: 3 Letters followed by 7 Numbers"
+                />
               </div>
-
 
               {/* --- 4. BANK INFORMATION --- */}
               <div className="col-12 mt-4">
@@ -1879,11 +2068,29 @@ const EmployeeManagement = () => {
               </div>
               <div className="col-md-6">
                 <label className="emp-label">IFS Code</label>
-                <input type="text" className="form-control form-control-sm" name="IFSCode" value={formData.IFSCode} onChange={handleChange} placeholder="IFS Code" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="IFSCode" 
+                  value={formData.IFSCode} 
+                  onChange={handleChange} 
+                  placeholder="IFS Code" 
+                  pattern="^[A-Z]{4}0[A-Z0-9]{6}$"
+                  title="Format: 4 Letters, '0', then 6 Alphanumeric Characters"
+                />
               </div>
               <div className="col-md-6">
                 <label className="emp-label">Account Number</label>
-                <input type="text" className="form-control form-control-sm" name="AcctNo" value={formData.AcctNo} onChange={handleChange} placeholder="Account Number" />
+                <input 
+                  type="text" 
+                  className="form-control form-control-sm" 
+                  name="AcctNo" 
+                  value={formData.AcctNo} 
+                  onChange={handleChange} 
+                  placeholder="Account Number" 
+                  pattern="^\d{9,18}$"
+                  title="Must be between 9 and 18 digits"
+                />
               </div>
 
             </form>
@@ -1903,27 +2110,56 @@ const EmployeeManagement = () => {
 
       {/* --- TABLE VIEW (ALWAYS VISIBLE AT BOTTOM) --- */}
       <div className="emp-list-view">
-        <h4 className="fw-bold text-dark mb-3">Registered Employees Directory</h4>
+        <div className="d-flex justify-content-between align-items-center mb-3">
+          <h4 className="fw-bold text-dark mb-0">Registered Employees Directory</h4>
+          {/* SEARCH BAR INTEGRATION */}
+          <div className="position-relative" style={{ width: '300px' }}>
+            <Search size={18} className="position-absolute text-muted" style={{ left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+            <input
+              type="text"
+              className="form-control form-control-sm ps-5"
+              placeholder="Search across all fields..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+        
         <div className="card shadow-sm border-0">
           <div className="card-body p-0 table-responsive">
             <table className="table table-hover align-middle mb-0 bg-white">
               <thead className="table-light text-uppercase" style={{ fontSize: "0.85rem" }}>
                 <tr>
                   <th className="py-3 ps-4">Profile</th>
-                  <th className="py-3">Emp ID</th>
-                  <th className="py-3">Name</th>
+                  
+                  {/* SORTABLE HEADERS */}
+                  <th 
+                    className="py-3 cursor-pointer sortable-header" 
+                    onClick={() => handleSort('AcctId')}
+                    title="Click to sort by Employee ID"
+                  >
+                    Emp ID {renderSortIcon('AcctId')}
+                  </th>
+                  <th 
+                    className="py-3 cursor-pointer sortable-header" 
+                    onClick={() => handleSort('AcctName')}
+                    title="Click to sort by Name"
+                  >
+                    Name {renderSortIcon('AcctName')}
+                  </th>
+                  
                   <th className="py-3 text-end pe-4">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {employees.length === 0 ? (
+                {sortedEmployees.length === 0 ? (
                   <tr>
                     <td colSpan="4" className="text-center py-5 text-muted fw-bold">
-                      No active employees found. Please register an employee above.
+                      {searchTerm ? "No employees match your search criteria." : "No active employees found. Please register an employee above."}
                     </td>
                   </tr>
                 ) : (
-                  employees.map((emp) => (
+                  sortedEmployees.map((emp) => (
                     <tr key={emp.id}>
                       <td className="ps-4">
                         <img 

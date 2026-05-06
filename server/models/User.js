@@ -1,3 +1,4 @@
+// models/User.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
@@ -45,7 +46,7 @@ const User = sequelize.define('User', {
     }
   }
 }, {
-  tableName: 'users',
+  tableName: 'UsersSignup', // <-- UPDATED TABLE NAME
   timestamps: true,
 });
 

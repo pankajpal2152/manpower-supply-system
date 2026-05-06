@@ -1,5 +1,6 @@
 // controllers/employeeController.js
 const { Employee, Document } = require('../models');
+const { sequelize } = require('../config/database'); 
 
 // Fetch ONLY active employees AND Profile Picture Document
 exports.getAllEmployees = async (req, res) => {
@@ -44,8 +45,7 @@ exports.createEmployee = async (req, res) => {
     const newEmployee = await Employee.create(data);
 
     // 2. Auto-Generate AcctId (Employee ID) based on the database primary key
-    // This will generate an ID like "EMP0001", "EMP0002", etc.
-    const generatedAcctId = `EMP${String(newEmployee.id).padStart(4, '0')}`;
+    const generatedAcctId = `${String(newEmployee.id).padStart(1, '0')}`;
     
     // 3. Handle Profile Image Document Storage
     let docName = null;
@@ -117,5 +117,32 @@ exports.deleteEmployee = async (req, res) => {
     res.status(200).json({ message: 'Employee deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error deleting employee', error: error.message });
+  }
+};
+
+// ==========================================
+// ✅ DYNAMIC DROPDOWNS API
+// ==========================================
+exports.getStates = async (req, res) => {
+  try {
+      const [results] = await sequelize.query('SELECT StateId, StateName FROM stateinfo WHERE IsActive = 1');
+      res.status(200).json(results);
+  } catch (error) {
+      console.error('Fetch States Error:', error);
+      res.status(500).json({ message: 'Error fetching states', error: error.message });
+  }
+};
+
+exports.getDistricts = async (req, res) => {
+  try {
+      const stateId = req.params.stateId;
+      // ✅ FIXED: Using 'IsActiv' to perfectly match the typo in your distinfo database table
+      const [results] = await sequelize.query('SELECT DistId, DistName FROM distinfo WHERE StateId = ? AND IsActiv = 1', {
+          replacements: [stateId]
+      });
+      res.status(200).json(results);
+  } catch (error) {
+      console.error('Fetch Districts Error:', error);
+      res.status(500).json({ message: 'Error fetching districts', error: error.message });
   }
 };

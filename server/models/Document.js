@@ -10,7 +10,7 @@ const Document = sequelize.define('Document', {
   documentData: { type: DataTypes.TEXT('long'), allowNull: false },
   employeeId: { type: DataTypes.INTEGER, allowNull: false }
 }, {
-  tableName: 'documents',
+  tableName: 'AllUploadDocuments', // <-- UPDATED TABLE NAME
   timestamps: true,
 });
 

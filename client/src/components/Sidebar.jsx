@@ -27,7 +27,10 @@ const Sidebar = ({ user }) => {
 
   return (
     <div className="sidebar-container">
-      <h2 className="sidebar-title">
+      {/* FIXED: Added inline style to reduce font size and prevent wrapping 
+        whiteSpace: 'nowrap' forces the text to stay on one line
+      */}
+      <h2 className="sidebar-title" style={{ fontSize: '1.4rem', whiteSpace: 'nowrap' }}>
         Manpower System
       </h2>
       

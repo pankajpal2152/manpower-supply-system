@@ -18,6 +18,10 @@ router.use(verifyToken);
 // Any logged-in user can view the list of employees.
 router.get('/', employeeController.getAllEmployees);
 
+// ✅ NEW: DROPDOWN DATA ROUTES
+router.get('/data/states', employeeController.getStates);
+router.get('/data/districts/:stateId', employeeController.getDistricts);
+
 // 3. POST /api/employees - Create new employee
 // Restricted: Only Superadmins and HR Admins can add new staff.
 router.post('/', authorizeRoles('Superadmin', 'HR Admin'), employeeController.createEmployee);
