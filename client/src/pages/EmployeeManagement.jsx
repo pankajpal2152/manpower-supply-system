@@ -1539,9 +1539,9 @@
 
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import api from "../api/axios";
+import api from "../api/axios"; // Adjust this based on your actual path
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Plus, Pencil, Trash2, CalendarDays, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Pencil, Trash2, CalendarDays, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
 import "./EmployeeManagement.css";
 
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
@@ -1587,11 +1587,15 @@ const EmployeeManagement = () => {
   const [editingId, setEditingId] = useState(null);
   const [formData, setFormData] = useState(emptyEmployeeForm);
   
-  // ✅ States for Dropdowns
+  // --- PAGINATION STATES ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // You can adjust this to 10 or 20
+
+  // Dropdown States
   const [dbStates, setDbStates] = useState([]);
   const [dbDistricts, setDbDistricts] = useState([]);
 
-  // --- SORTING STATE ---
+  // Sorting State
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
   
   const fileInputRef = useRef(null);
@@ -1607,7 +1611,6 @@ const EmployeeManagement = () => {
     }
   };
 
-  // ✅ Fetch states on mount
   useEffect(() => {
     fetchEmployees();
     
@@ -1622,10 +1625,8 @@ const EmployeeManagement = () => {
     fetchStates();
   }, []);
 
-  // ✅ Fetch districts dynamically when State changes
   useEffect(() => {
     if (formData.State) {
-        // Find the StateId corresponding to the selected StateName
         const matchedState = dbStates.find(s => s.StateName === formData.State);
         if (matchedState) {
             const fetchDistricts = async () => {
@@ -1645,8 +1646,9 @@ const EmployeeManagement = () => {
     }
   }, [formData.State, dbStates]);
 
-  // --- Lightning Fast Live Search Logic ---
+  // --- SEARCH LOGIC ---
   useEffect(() => {
+    setCurrentPage(1); // Reset to page 1 whenever search changes
     if (!searchTerm.trim()) {
       setFilteredEmployees(employees);
       return;
@@ -1667,7 +1669,7 @@ const EmployeeManagement = () => {
     setFilteredEmployees(filtered);
   }, [searchTerm, employees]);
 
-  // --- COLUMN SORTING LOGIC ---
+  // --- SORTING LOGIC ---
   const handleSort = (key) => {
     let direction = 'ascending';
     if (sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -1691,8 +1693,16 @@ const EmployeeManagement = () => {
     return sortableItems;
   }, [filteredEmployees, sortConfig]);
 
+  // --- PAGINATION LOGIC ---
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedEmployees.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(sortedEmployees.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   const renderSortIcon = (columnName) => {
-    if (sortConfig.key !== columnName) return <ArrowUpDown size={14} className="ms-1 text-muted" />;
+    if (sortConfig.key !== columnName) return <ArrowUpDown size={14} className="ms-1 text-muted opacity-50" />;
     if (sortConfig.direction === 'ascending') return <ArrowUp size={14} className="ms-1 text-primary" />;
     return <ArrowDown size={14} className="ms-1 text-primary" />;
   };
@@ -1700,7 +1710,6 @@ const EmployeeManagement = () => {
   const handleChange = (e) => {
     let { name, value, type, checked } = e.target;
 
-    // --- Input Limitations & Filtering ---
     if (["AcctName", "FathersName"].includes(name)) {
       value = value.replace(/[^a-zA-Z\s.]/g, "");
     }
@@ -1725,8 +1734,6 @@ const EmployeeManagement = () => {
 
     setFormData(prev => {
       const updatedData = { ...prev, [name]: type === "checkbox" ? checked : value };
-      
-      // ✅ Reset District field if State is changed to prevent invalid combinations
       if (name === "State") {
           updatedData.District = "";
       }
@@ -1734,7 +1741,6 @@ const EmployeeManagement = () => {
     });
   };
 
-  // --- IMAGE UPLOAD LOGIC ---
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -1814,7 +1820,7 @@ const EmployeeManagement = () => {
   };
 
   return (
-    <div className="emp-wrapper p-4">
+    <div className="emp-wrapper p-4 enterprise-font">
       <style>{`
         .modern-date-input::-webkit-calendar-picker-indicator {
           background: transparent;
@@ -1827,10 +1833,6 @@ const EmployeeManagement = () => {
           right: 0;
           top: 0;
           width: auto;
-        }
-        .sortable-header:hover {
-          background-color: #e9ecef !important;
-          transition: background-color 0.2s;
         }
       `}</style>
 
@@ -1853,7 +1855,6 @@ const EmployeeManagement = () => {
 
           <div className="emp-card-body p-4 bg-white">
             <form id="employeeForm" onSubmit={handleSubmit} className="row g-3">
-              
               {/* --- 1. PERSONAL INFORMATION --- */}
               <div className="col-12">
                 <p className="PerInfo m-0 rounded">Personal Information</p>
@@ -1879,36 +1880,16 @@ const EmployeeManagement = () => {
                 </div>
               </div>
 
-              {/* Row 1: Account Name and Father's Name */}
+              {/* Form Inputs */}
               <div className="col-md-6">
                 <label className="emp-label">Account Name *</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="AcctName" 
-                  value={formData.AcctName} 
-                  onChange={handleChange} 
-                  required 
-                  placeholder="Full Name" 
-                  pattern="^[a-zA-Z\s.]+$"
-                  title="Name can only contain letters and spaces"
-                />
+                <input type="text" className="form-control form-control-sm" name="AcctName" value={formData.AcctName} onChange={handleChange} required placeholder="Full Name" />
               </div>
               <div className="col-md-6">
                 <label className="emp-label">Father's Name</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="FathersName" 
-                  value={formData.FathersName} 
-                  onChange={handleChange} 
-                  placeholder="Father's Name" 
-                  pattern="^[a-zA-Z\s.]+$"
-                  title="Name can only contain letters and spaces"
-                />
+                <input type="text" className="form-control form-control-sm" name="FathersName" value={formData.FathersName} onChange={handleChange} placeholder="Father's Name" />
               </div>
 
-              {/* Row 2: Gender, DOB, Marital Status */}
               <div className="col-md-4">
                 <label className="emp-label">Gender</label>
                 <select name="Gender" value={formData.Gender} onChange={handleChange} className="form-select form-select-sm">
@@ -1920,20 +1901,8 @@ const EmployeeManagement = () => {
               <div className="col-md-4">
                 <label className="emp-label">Date of Birth</label>
                 <div className="position-relative">
-                  <input 
-                    type="date" 
-                    className="form-control form-control-sm modern-date-input" 
-                    name="DOB" 
-                    value={formData.DOB} 
-                    onChange={handleChange} 
-                    onClick={(e) => e.target.showPicker && e.target.showPicker()}
-                    style={{ cursor: "pointer", zIndex: 1, position: "relative", backgroundColor: "transparent" }}
-                  />
-                  <CalendarDays 
-                    size={16} 
-                    className="position-absolute text-muted" 
-                    style={{ right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 0 }} 
-                  />
+                  <input type="date" className="form-control form-control-sm modern-date-input" name="DOB" value={formData.DOB} onChange={handleChange} />
+                  <CalendarDays size={16} className="position-absolute text-muted" style={{ right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 0 }} />
                 </div>
               </div>
 
@@ -1959,32 +1928,21 @@ const EmployeeManagement = () => {
                 <input type="text" className="form-control form-control-sm" name="Landmark" value={formData.Landmark} onChange={handleChange} placeholder="Landmark" />
               </div>
 
-              {/* Address Row 2: ✅ DYNAMIC State and District */}
               <div className="col-md">
                 <label className="emp-label">State</label>
                 <select name="State" value={formData.State} onChange={handleChange} className="form-select form-select-sm">
                   <option value="">Select State...</option>
                   {dbStates.map((state) => (
-                    <option key={state.StateId} value={state.StateName}>
-                        {state.StateName}
-                    </option>
+                    <option key={state.StateId} value={state.StateName}>{state.StateName}</option>
                   ))}
                 </select>
               </div>
               <div className="col-md">
                 <label className="emp-label">District</label>
-                <select 
-                    name="District" 
-                    value={formData.District} 
-                    onChange={handleChange} 
-                    className="form-select form-select-sm"
-                    disabled={!formData.State}
-                >
+                <select name="District" value={formData.District} onChange={handleChange} className="form-select form-select-sm" disabled={!formData.State}>
                   <option value="">Select District...</option>
                   {dbDistricts.map((dist) => (
-                    <option key={dist.DistId} value={dist.DistName}>
-                        {dist.DistName}
-                    </option>
+                    <option key={dist.DistId} value={dist.DistName}>{dist.DistName}</option>
                   ))}
                 </select>
               </div>
@@ -1998,16 +1956,7 @@ const EmployeeManagement = () => {
               </div>
               <div className="col-md">
                 <label className="emp-label">Pin Code</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="PinCode" 
-                  value={formData.PinCode} 
-                  onChange={handleChange} 
-                  placeholder="Pin Code" 
-                  pattern="^[1-9][0-9]{5}$"
-                  title="PIN code must be exactly 6 digits and cannot start with 0"
-                />
+                <input type="text" className="form-control form-control-sm" name="PinCode" value={formData.PinCode} onChange={handleChange} placeholder="Pin Code" />
               </div>
 
               {/* --- 3. IDENTITY --- */}
@@ -2016,42 +1965,15 @@ const EmployeeManagement = () => {
               </div>
               <div className="col-md-4">
                 <label className="emp-label">PAN No</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="PanNo" 
-                  value={formData.PanNo} 
-                  onChange={handleChange} 
-                  placeholder="PAN No" 
-                  pattern="^[A-Z]{5}[0-9]{4}[A-Z]{1}$"
-                  title="Format: 5 Letters, 4 Numbers, 1 Letter (e.g., ABCDE1234F)"
-                />
+                <input type="text" className="form-control form-control-sm" name="PanNo" value={formData.PanNo} onChange={handleChange} placeholder="PAN No" />
               </div>
               <div className="col-md-4">
                 <label className="emp-label">Aadhar No</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="AadharNo" 
-                  value={formData.AadharNo} 
-                  onChange={handleChange} 
-                  placeholder="Aadhar No" 
-                  pattern="^\d{12}$"
-                  title="Must be exactly 12 digits"
-                />
+                <input type="text" className="form-control form-control-sm" name="AadharNo" value={formData.AadharNo} onChange={handleChange} placeholder="Aadhar No" />
               </div>
               <div className="col-md-4">
                 <label className="emp-label">Voter No</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="VoterNo" 
-                  value={formData.VoterNo} 
-                  onChange={handleChange} 
-                  placeholder="Voter No" 
-                  pattern="^[A-Z]{3}[0-9]{7}$"
-                  title="Format: 3 Letters followed by 7 Numbers"
-                />
+                <input type="text" className="form-control form-control-sm" name="VoterNo" value={formData.VoterNo} onChange={handleChange} placeholder="Voter No" />
               </div>
 
               {/* --- 4. BANK INFORMATION --- */}
@@ -2068,35 +1990,16 @@ const EmployeeManagement = () => {
               </div>
               <div className="col-md-6">
                 <label className="emp-label">IFS Code</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="IFSCode" 
-                  value={formData.IFSCode} 
-                  onChange={handleChange} 
-                  placeholder="IFS Code" 
-                  pattern="^[A-Z]{4}0[A-Z0-9]{6}$"
-                  title="Format: 4 Letters, '0', then 6 Alphanumeric Characters"
-                />
+                <input type="text" className="form-control form-control-sm" name="IFSCode" value={formData.IFSCode} onChange={handleChange} placeholder="IFS Code" />
               </div>
               <div className="col-md-6">
                 <label className="emp-label">Account Number</label>
-                <input 
-                  type="text" 
-                  className="form-control form-control-sm" 
-                  name="AcctNo" 
-                  value={formData.AcctNo} 
-                  onChange={handleChange} 
-                  placeholder="Account Number" 
-                  pattern="^\d{9,18}$"
-                  title="Must be between 9 and 18 digits"
-                />
+                <input type="text" className="form-control form-control-sm" name="AcctNo" value={formData.AcctNo} onChange={handleChange} placeholder="Account Number" />
               </div>
 
             </form>
           </div>
 
-          {/* Form Footer */}
           <div className="emp-card-footer rounded-bottom bg-light border-top p-3 d-flex justify-content-end gap-2">
             <button type="button" className="btn btn-secondary px-4 shadow-sm" onClick={handleResetForm}>
               {editingId ? "Cancel Edit" : "Clear Form"}
@@ -2112,12 +2015,11 @@ const EmployeeManagement = () => {
       <div className="emp-list-view">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4 className="fw-bold text-dark mb-0">Registered Employees Directory</h4>
-          {/* SEARCH BAR INTEGRATION */}
-          <div className="position-relative" style={{ width: '300px' }}>
-            <Search size={18} className="position-absolute text-muted" style={{ left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+          <div className="position-relative enterprise-search-box" style={{ width: '320px' }}>
+            <Search size={18} className="position-absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
-              className="form-control form-control-sm ps-5"
+              className="form-control form-control-sm ps-5 enterprise-search"
               placeholder="Search across all fields..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -2125,58 +2027,73 @@ const EmployeeManagement = () => {
           </div>
         </div>
         
-        <div className="card shadow-sm border-0">
-          <div className="card-body p-0 table-responsive">
-            <table className="table table-hover align-middle mb-0 bg-white">
-              <thead className="table-light text-uppercase" style={{ fontSize: "0.85rem" }}>
+        <div className="card shadow-sm border-0 enterprise-table-card">
+          <div className="card-body p-0 table-responsive custom-scrollbar">
+            <table className="table table-hover align-middle mb-0 bg-white enterprise-table">
+              <thead className="table-light text-uppercase">
                 <tr>
-                  <th className="py-3 ps-4">Profile</th>
-                  
-                  {/* SORTABLE HEADERS */}
-                  <th 
-                    className="py-3 cursor-pointer sortable-header" 
-                    onClick={() => handleSort('AcctId')}
-                    title="Click to sort by Employee ID"
-                  >
-                    Emp ID {renderSortIcon('AcctId')}
-                  </th>
-                  <th 
-                    className="py-3 cursor-pointer sortable-header" 
-                    onClick={() => handleSort('AcctName')}
-                    title="Click to sort by Name"
-                  >
-                    Name {renderSortIcon('AcctName')}
-                  </th>
-                  
-                  <th className="py-3 text-end pe-4">Actions</th>
+                  <th className="py-3 ps-4 sticky-col-left">Profile</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AcctId')}>Emp ID {renderSortIcon('AcctId')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AcctName')}>Name {renderSortIcon('AcctName')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('FathersName')}>Father's Name {renderSortIcon('FathersName')}</th>
+                  <th className="py-3">Gender</th>
+                  <th className="py-3">DOB</th>
+                  <th className="py-3">Marital Status</th>
+                  <th className="py-3">City/Village</th>
+                  <th className="py-3">State</th>
+                  <th className="py-3">District</th>
+                  <th className="py-3">PIN</th>
+                  <th className="py-3">PAN No</th>
+                  <th className="py-3">Aadhar No</th>
+                  <th className="py-3">Voter No</th>
+                  <th className="py-3">Bank Name</th>
+                  <th className="py-3">IFS Code</th>
+                  <th className="py-3">Account No</th>
+                  <th className="py-3 text-end pe-4 sticky-col-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedEmployees.length === 0 ? (
+                {currentItems.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center py-5 text-muted fw-bold">
+                    <td colSpan="18" className="text-center py-5 text-muted fw-bold">
                       {searchTerm ? "No employees match your search criteria." : "No active employees found. Please register an employee above."}
                     </td>
                   </tr>
                 ) : (
-                  sortedEmployees.map((emp) => (
+                  currentItems.map((emp) => (
                     <tr key={emp.id}>
-                      <td className="ps-4">
+                      <td className="ps-4 sticky-col-left bg-white">
                         <img 
                           src={emp.ProfilePictureBase64 || DEFAULT_AVATAR} 
                           alt="avatar" 
-                          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #dee2e6' }}
+                          className="enterprise-table-avatar"
                         />
                       </td>
                       <td className="text-primary fw-bold">{emp.AcctId || "N/A"}</td>
-                      <td className="fw-bold text-dark">{emp.AcctName}</td>
-                      <td className="text-end pe-4">
-                        <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary me-2">
-                          <Pencil size={14} className="me-1" /> Edit
-                        </button>
-                        <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger">
-                          <Trash2 size={14} className="me-1" /> Delete
-                        </button>
+                      <td className="fw-bold text-dark">{emp.AcctName || "-"}</td>
+                      <td>{emp.FathersName || "-"}</td>
+                      <td>{emp.Gender === 'M' ? 'Male' : emp.Gender === 'F' ? 'Female' : "-"}</td>
+                      <td>{emp.DOB || "-"}</td>
+                      <td>{emp.MaritalStatus || "-"}</td>
+                      <td>{emp.CityVillage || "-"}</td>
+                      <td>{emp.State || "-"}</td>
+                      <td>{emp.District || "-"}</td>
+                      <td>{emp.PinCode || "-"}</td>
+                      <td>{emp.PanNo || "-"}</td>
+                      <td>{emp.AadharNo || "-"}</td>
+                      <td>{emp.VoterNo || "-"}</td>
+                      <td>{emp.BankName || "-"}</td>
+                      <td>{emp.IFSCode || "-"}</td>
+                      <td>{emp.AcctNo || "-"}</td>
+                      <td className="text-end pe-4 sticky-col-right bg-white">
+                        <div className="d-flex justify-content-end gap-2">
+                          <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary enterprise-btn">
+                            <Pencil size={14} />
+                          </button>
+                          <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger enterprise-btn">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -2184,9 +2101,46 @@ const EmployeeManagement = () => {
               </tbody>
             </table>
           </div>
+
+          {/* --- PAGINATION FOOTER --- */}
+          {sortedEmployees.length > 0 && (
+            <div className="card-footer bg-white border-top py-3 d-flex justify-content-between align-items-center">
+              <span className="text-muted small fw-medium">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, sortedEmployees.length)} of {sortedEmployees.length} entries
+              </span>
+              <div className="enterprise-pagination d-flex gap-1">
+                <button 
+                  onClick={() => paginate(currentPage - 1)} 
+                  disabled={currentPage === 1}
+                  className="btn btn-sm btn-light border d-flex align-items-center"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                
+                {/* Page Numbers */}
+                {[...Array(totalPages)].map((_, index) => (
+                  <button 
+                    key={index} 
+                    onClick={() => paginate(index + 1)}
+                    className={`btn btn-sm border fw-bold ${currentPage === index + 1 ? 'btn-primary' : 'btn-light'}`}
+                    style={{ minWidth: '32px' }}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                <button 
+                  onClick={() => paginate(currentPage + 1)} 
+                  disabled={currentPage === totalPages}
+                  className="btn btn-sm btn-light border d-flex align-items-center"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
-      
     </div>
   );
 };

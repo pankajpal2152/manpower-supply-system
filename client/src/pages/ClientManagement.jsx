@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import api from "../api/axios";
+import api from "../api/axios"; // Adjust to your actual path
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
-import "./EmployeeManagement.css"; 
+// ✅ Added ChevronLeft and ChevronRight for pagination
+import { Plus, Pencil, Trash2, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight } from "lucide-react";
+import "./EmployeeManagement.css"; // Assuming you kept the same CSS file name for the styles
 
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
 
@@ -40,6 +41,10 @@ const ClientManagement = () => {
   // ✅ States for Dropdowns
   const [dbStates, setDbStates] = useState([]);
   const [dbDistricts, setDbDistricts] = useState([]);
+
+  // --- PAGINATION STATES ---
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(5); // Adjust this number to show more/less rows per page
 
   // --- SORTING STATE ---
   const [sortConfig, setSortConfig] = useState({ key: null, direction: 'ascending' });
@@ -96,6 +101,7 @@ const ClientManagement = () => {
 
   // --- Live Search Logic ---
   useEffect(() => {
+    setCurrentPage(1); // ✅ Reset to page 1 whenever search changes
     if (!searchTerm.trim()) {
       setFilteredClients(clients);
       return;
@@ -136,10 +142,18 @@ const ClientManagement = () => {
   }, [filteredClients, sortConfig]);
 
   const renderSortIcon = (columnName) => {
-    if (sortConfig.key !== columnName) return <ArrowUpDown size={14} className="ms-1 text-muted" />;
+    if (sortConfig.key !== columnName) return <ArrowUpDown size={14} className="ms-1 text-muted opacity-50" />;
     if (sortConfig.direction === 'ascending') return <ArrowUp size={14} className="ms-1 text-primary" />;
     return <ArrowDown size={14} className="ms-1 text-primary" />;
   };
+
+  // --- PAGINATION LOGIC ---
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = sortedClients.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(sortedClients.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleChange = (e) => {
     let { name, value } = e.target;
@@ -152,7 +166,6 @@ const ClientManagement = () => {
 
     setFormData(prev => {
       const updatedData = { ...prev, [name]: value };
-      // ✅ Reset District if State changes
       if (name === "State") { updatedData.District = ""; }
       return updatedData;
     });
@@ -236,7 +249,8 @@ const ClientManagement = () => {
   };
 
   return (
-    <div className="emp-wrapper p-4">
+    // ✅ Applied enterprise-font wrapper
+    <div className="emp-wrapper p-4 enterprise-font">
       <div className="d-flex justify-content-between align-items-center mb-4" ref={formTopRef}>
         <div>
           <h2 className="fw-bold mb-0 text-dark">Client Management</h2>
@@ -369,11 +383,12 @@ const ClientManagement = () => {
       <div className="emp-list-view">
         <div className="d-flex justify-content-between align-items-center mb-3">
           <h4 className="fw-bold text-dark mb-0">Registered Clients Directory</h4>
-          <div className="position-relative" style={{ width: '300px' }}>
-            <Search size={18} className="position-absolute text-muted" style={{ left: '10px', top: '50%', transform: 'translateY(-50%)' }} />
+          {/* ✅ Applied enterprise search bar styling */}
+          <div className="position-relative enterprise-search-box" style={{ width: '320px' }}>
+            <Search size={18} className="position-absolute text-muted" style={{ left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
               type="text"
-              className="form-control form-control-sm ps-5"
+              className="form-control form-control-sm ps-5 enterprise-search"
               placeholder="Search across all fields..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -381,47 +396,75 @@ const ClientManagement = () => {
           </div>
         </div>
         
-        <div className="card shadow-sm border-0">
-          <div className="card-body p-0 table-responsive">
-            <table className="table table-hover align-middle mb-0 bg-white">
-              <thead className="table-light text-uppercase" style={{ fontSize: "0.85rem" }}>
+        {/* ✅ Applied Enterprise Table Card Styling */}
+        <div className="card shadow-sm border-0 enterprise-table-card">
+          <div className="card-body p-0 table-responsive custom-scrollbar">
+            <table className="table table-hover align-middle mb-0 bg-white enterprise-table">
+              <thead className="table-light text-uppercase">
                 <tr>
-                  <th className="py-3 ps-4">Profile</th>
+                  {/* ✅ Added sticky-col-left so it stays visible while scrolling horizontally */}
+                  <th className="py-3 ps-4 sticky-col-left">Profile</th>
                   <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AcctId')}>
                     Client ID {renderSortIcon('AcctId')}
                   </th>
                   <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AccountName')}>
                     Account Name {renderSortIcon('AccountName')}
                   </th>
-                  <th className="py-3 text-end pe-4">Actions</th>
+                  {/* ✅ Expanded columns for ALL Form Data */}
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('CityVillage')}>City/Village {renderSortIcon('CityVillage')}</th>
+                  <th className="py-3">Landmark</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('State')}>State {renderSortIcon('State')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('District')}>District {renderSortIcon('District')}</th>
+                  <th className="py-3">Post Office</th>
+                  <th className="py-3">Police Station</th>
+                  <th className="py-3">PIN Code</th>
+                  <th className="py-3">Bank Name</th>
+                  <th className="py-3">IFS Code</th>
+                  <th className="py-3">Account No</th>
+
+                  {/* ✅ Added sticky-col-right for actions */}
+                  <th className="py-3 text-end pe-4 sticky-col-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {sortedClients.length === 0 ? (
+                {currentItems.length === 0 ? (
                   <tr>
-                    <td colSpan="4" className="text-center py-5 text-muted fw-bold">
+                    <td colSpan="14" className="text-center py-5 text-muted fw-bold">
                       {searchTerm ? "No clients match your search criteria." : "No active clients found. Please register a client above."}
                     </td>
                   </tr>
                 ) : (
-                  sortedClients.map((client) => (
+                  currentItems.map((client) => (
                     <tr key={client.id}>
-                      <td className="ps-4">
+                      <td className="ps-4 sticky-col-left bg-white">
                         <img 
                           src={client.ProfilePictureBase64 || DEFAULT_AVATAR} 
                           alt="avatar" 
-                          style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover', border: '1px solid #dee2e6' }}
+                          className="enterprise-table-avatar"
                         />
                       </td>
                       <td className="text-primary fw-bold">{client.AcctId || "N/A"}</td>
-                      <td className="fw-bold text-dark">{client.AccountName}</td>
-                      <td className="text-end pe-4">
-                        <button onClick={() => handleEdit(client)} className="btn btn-sm btn-outline-secondary me-2">
-                          <Pencil size={14} className="me-1" /> Edit
-                        </button>
-                        <button onClick={() => handleDelete(client.id)} className="btn btn-sm btn-outline-danger">
-                          <Trash2 size={14} className="me-1" /> Delete
-                        </button>
+                      <td className="fw-bold text-dark">{client.AccountName || "-"}</td>
+                      <td>{client.CityVillage || "-"}</td>
+                      <td>{client.Landmark || "-"}</td>
+                      <td>{client.State || "-"}</td>
+                      <td>{client.District || "-"}</td>
+                      <td>{client.PostOffice || "-"}</td>
+                      <td>{client.PolicStation || "-"}</td>
+                      <td>{client.PinCode || "-"}</td>
+                      <td>{client.BankName || "-"}</td>
+                      <td>{client.IFSCode || "-"}</td>
+                      <td>{client.AcctNo || "-"}</td>
+
+                      <td className="text-end pe-4 sticky-col-right bg-white">
+                        <div className="d-flex justify-content-end gap-2">
+                          <button onClick={() => handleEdit(client)} className="btn btn-sm btn-outline-secondary enterprise-btn">
+                            <Pencil size={14} />
+                          </button>
+                          <button onClick={() => handleDelete(client.id)} className="btn btn-sm btn-outline-danger enterprise-btn">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -429,6 +472,44 @@ const ClientManagement = () => {
               </tbody>
             </table>
           </div>
+
+          {/* --- PAGINATION CONTROLS --- */}
+          {sortedClients.length > 0 && (
+            <div className="card-footer bg-white border-top py-3 d-flex justify-content-between align-items-center">
+              <span className="text-muted small fw-medium">
+                Showing {indexOfFirstItem + 1} to {Math.min(indexOfLastItem, sortedClients.length)} of {sortedClients.length} entries
+              </span>
+              <div className="enterprise-pagination d-flex gap-1">
+                <button 
+                  onClick={() => paginate(currentPage - 1)} 
+                  disabled={currentPage === 1}
+                  className="btn btn-sm btn-light border d-flex align-items-center"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                
+                {[...Array(totalPages)].map((_, index) => (
+                  <button 
+                    key={index} 
+                    onClick={() => paginate(index + 1)}
+                    className={`btn btn-sm border fw-bold ${currentPage === index + 1 ? 'btn-primary' : 'btn-light'}`}
+                    style={{ minWidth: '32px' }}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                <button 
+                  onClick={() => paginate(currentPage + 1)} 
+                  disabled={currentPage === totalPages}
+                  className="btn btn-sm btn-light border d-flex align-items-center"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
       
