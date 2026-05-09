@@ -6,7 +6,8 @@ const Permission = require('./Permission');
 const Employee = require('./Employee'); 
 const Document = require('./Document');
 const Client = require('./Client'); 
-const Job = require('./Job'); // <-- NEW IMPORT
+const Job = require('./Job');
+const EmpCode = require('./EmpCode');
 
 Role.hasMany(User, { foreignKey: 'roleId' });
 User.belongsTo(Role, { foreignKey: 'roleId' });
@@ -34,5 +35,6 @@ module.exports = {
   Employee,
   Document,
   Client,
-  Job // <-- NEW EXPORT
+  Job,
+  EmpCode// <-- NEW EXPORT
 };
