@@ -13,14 +13,18 @@ const employeeRoutes = require('./routes/employeeRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const clientRoutes = require('./routes/clientRoutes');
 const jobRoutes = require('./routes/jobRoutes');
+const leaveRoutes = require('./routes/leaveRoutes');
+const salaryRoutes = require('./routes/salaryRoutes');
+const payrollRoutes = require('./routes/payrollRoutes');
+
 const app = express();
 
 // Middleware
 app.use(cors());
 
 // ==========================================
-// FIX: INCREASE PAYLOAD SIZE LIMITS
-// We increased the limit to 50mb to safely accommodate Base64 image strings
+// INCREASE PAYLOAD SIZE LIMITS
+// Increased the limit to 500mb to safely accommodate Base64 image strings
 // ==========================================
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ limit: '500mb', extended: true }));
@@ -33,10 +37,17 @@ const startServer = async () => {
     // 2. Connect to the Database
     await connectDB();
 
-    // 3. Sync database models
-    // { alter: true } matches the database tables to the models without losing data
-    await sequelize.sync({ alter: true });
-    console.log('✅ Database models synchronized successfully.');
+    // 3. Sync database models (INDUSTRY STANDARD FIX)
+    // We remove { alter: true } to prevent the "Too many keys (64 limit)" bug.
+    // In production, 'alter' or 'force' should ALWAYS be false to prevent data loss.
+    // If you add new columns to your models in the future, you can temporarily change this to { alter: true } for one run, then change it back.
+    const syncOptions = {
+      alter: false, 
+      force: false 
+    };
+
+    await sequelize.sync(syncOptions);
+    console.log('✅ Database models synchronized successfully (without altering existing schemas).');
 
     // 4. Register Routes
     app.use('/api/jobs', jobRoutes);
@@ -46,6 +57,10 @@ const startServer = async () => {
     app.use('/api/employees', employeeRoutes);
     app.use('/api/dashboard', dashboardRoutes);
     app.use('/api/clients', clientRoutes);
+    app.use('/api/leaves', leaveRoutes);
+    app.use('/api/salary', salaryRoutes);
+    app.use('/api/payroll', payrollRoutes);
+    
     // Test Route
     app.get('/api/test', (req, res) => {
       res.json({ message: 'Welcome to the Manpower Supply System API!' });

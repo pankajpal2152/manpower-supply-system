@@ -10,6 +10,8 @@ const Sidebar = ({ user }) => {
     { name: 'Employee Management', path: '/employees', icon: '👥', requiredPermission: 'MANAGE_EMPLOYEES' },
     { name: 'Client Management', path: '/clients', icon: '🏢', requiredPermission: 'MANAGE_CLIENTS' },
     { name: 'Job Management', path: '/jobs', icon: '💼', requiredPermission: 'MANAGE_JOBS' },
+    { name: 'Attendance', path: '/attendance', icon: '📅', requiredPermission: 'MANAGE_ATTENDANCE' },
+    { name: 'Leave Management', path: '/leaves', icon: '🏖️', requiredPermission: 'MANAGE_LEAVES' },
     { name: 'Payroll System', path: '/payroll', icon: '💰', requiredPermission: 'MANAGE_PAYROLL' },
     { name: 'Invoice System', path: '/invoices', icon: '🧾', requiredPermission: 'MANAGE_INVOICES' },
     { name: 'Reports', path: '/reports', icon: '📈', requiredPermission: 'VIEW_REPORTS' },

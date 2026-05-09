@@ -6,8 +6,11 @@ import Dashboard from './pages/Dashboard';
 import Layout from './components/Layout';
 import UserManagement from './pages/UserManagement';
 import EmployeeManagement from './pages/EmployeeManagement';
-import ClientManagement from './pages/ClientManagement'; 
-import JobManagement from './pages/JobManagement'; // <-- NEW IMPORT
+import ClientManagement from './pages/ClientManagement';
+import JobManagement from './pages/JobManagement';
+import AttendanceManagement from './pages/AttendancePage.jsx';
+import LeaveManagement from './pages/LeaveManagement.jsx';
+import PayrollDashboard from './pages/PayrollDashboard.jsx';
 
 function App() {
   return (
@@ -17,16 +20,17 @@ function App() {
 
         <Route element={<Layout />}>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          
+
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/employees" element={<EmployeeManagement />} /> 
-          <Route path="/users" element={<UserManagement />} /> 
-          <Route path="/clients" element={<ClientManagement />} /> 
-          
+          <Route path="/employees" element={<EmployeeManagement />} />
+          <Route path="/users" element={<UserManagement />} />
+          <Route path="/clients" element={<ClientManagement />} />
+
           {/* ✅ Job Management Route actively linked! */}
-          <Route path="/jobs" element={<JobManagement />} /> 
-          
-          <Route path="/payroll" element={<div style={{ padding: '20px' }}><h2>Payroll System</h2><p>Coming soon...</p></div>} />
+          <Route path="/jobs" element={<JobManagement />} />
+          <Route path="/attendance" element={<AttendanceManagement />} />
+          <Route path="/leaves" element={<LeaveManagement />} />
+          <Route path="/payroll" element={<PayrollDashboard />} />
           <Route path="/invoices" element={<div style={{ padding: '20px' }}><h2>Invoice System</h2><p>Coming soon...</p></div>} />
           <Route path="/reports" element={<div style={{ padding: '20px' }}><h2>Reports</h2><p>Coming soon...</p></div>} />
         </Route>
