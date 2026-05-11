@@ -12,11 +12,18 @@ const seedDatabase = async () => {
       { name: 'MANAGE_EMPLOYEES', module: 'Employee Management', description: 'Add, edit, delete employees' },
       { name: 'MANAGE_CLIENTS', module: 'Client Management', description: 'Add, edit, delete clients' },
       { name: 'MANAGE_JOBS', module: 'Job Management', description: 'Create and assign jobs' },
+      
+      // ✅ ADDED MISSING PERMISSIONS HERE
+      { name: 'MANAGE_ATTENDANCE', module: 'Attendance', description: 'Manage employee daily attendance' },
+      { name: 'MANAGE_LEAVES', module: 'Leave Management', description: 'Approve or reject employee leaves' },
+      
       { name: 'MANAGE_PAYROLL', module: 'Payroll System', description: 'Generate payroll and payslips' },
       { name: 'MANAGE_INVOICES', module: 'Invoice System', description: 'Create and manage invoices' },
       { name: 'VIEW_REPORTS', module: 'Reports', description: 'View system analytics and reports' },
       { name: 'MANAGE_USERS', module: 'User Management', description: 'Manage system users and access' }
     ];
+    
+    // ignoreDuplicates ensures it only adds the new ones without crashing!
     await Permission.bulkCreate(permissionsData, { ignoreDuplicates: true });
 
     // 2. Create Superadmin Role
@@ -24,6 +31,8 @@ const seedDatabase = async () => {
       where: { name: 'Superadmin' },
       defaults: { description: 'Ultimate access to all modules' }
     });
+    
+    // Fetch ALL permissions (including the new Attendance ones) and assign them to Superadmin
     const allPermissions = await Permission.findAll();
     await superAdminRole.setPermissions(allPermissions);
 
@@ -48,7 +57,7 @@ const seedDatabase = async () => {
       console.log(`👤 Username: ${adminUsername}`);
       console.log(`🔑 Password: ${adminPassword}`);
     } else {
-      console.log('⚠️ Superadmin user already exists. Skipping creation.');
+      console.log('⚠️ Superadmin user already exists. Database updated with new permissions.');
     }
 
     console.log('--- 🎉 Seeding Process Complete ---');

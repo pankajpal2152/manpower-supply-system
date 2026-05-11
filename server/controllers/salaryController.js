@@ -1,53 +1,58 @@
 // controllers/salaryController.js
-const { SalaryStructure, Employee } = require('../models');
+const { SalaryStructure } = require('../models');
 
+// Save or Update an Employee's Salary Configuration
 exports.saveSalaryStructure = async (req, res) => {
   try {
-    const { employeeId, basicPay, dearnessAllowance, houseRentAllowance, incentives, 
-            attendanceBonus, cityCompensatoryAllowance, mealAllowance, uniformAllowance, 
-            specialAllowance, tdsDeduction, otherDeductions } = req.body;
+    const { employeeId, ...salaryData } = req.body;
 
-    // 1. Ensure numbers (default to 0 if empty)
-    const basic = parseFloat(basicPay || 0);
-    const da = parseFloat(dearnessAllowance || 0);
-    const hra = parseFloat(houseRentAllowance || 0);
-    const inc = parseFloat(incentives || 0);
-    const att = parseFloat(attendanceBonus || 0);
-    const cca = parseFloat(cityCompensatoryAllowance || 0);
-    const meal = parseFloat(mealAllowance || 0);
-    const uniform = parseFloat(uniformAllowance || 0);
-    const special = parseFloat(specialAllowance || 0);
-    const tds = parseFloat(tdsDeduction || 0);
-    const otherDed = parseFloat(otherDeductions || 0);
-
-    // 2. Calculate Gross Salary (Sum of all earnings based on your image)
-    const grossSalary = basic + da + hra + inc + att + cca + meal + uniform + special;
-
-    // 3. Auto-Calculate PF (Example: 12% of Basic + DA)
-    const pfContribution = (basic + da) * 0.12;
-
-    // 4. Auto-Calculate ESI (Example: 0.75% of Gross if Gross <= 21000)
-    let esiContribution = 0;
-    if (grossSalary <= 21000) {
-        esiContribution = grossSalary * 0.0075;
+    if (!employeeId) {
+      return res.status(400).json({ message: 'Employee ID is required.' });
     }
 
-    // 5. Calculate Net Salary
-    const totalDeductions = pfContribution + esiContribution + tds + otherDed;
-    const netSalary = grossSalary - totalDeductions;
-
-    // 6. Save or Update in Database
+    // Upsert acts as an "Update if exists, otherwise Create"
+    // Since employeeId is unique in this table, it will perfectly overwrite the old config
     const [structure, created] = await SalaryStructure.upsert({
-      employeeId, basicPay: basic, dearnessAllowance: da, houseRentAllowance: hra,
-      incentives: inc, attendanceBonus: att, cityCompensatoryAllowance: cca,
-      mealAllowance: meal, uniformAllowance: uniform, specialAllowance: special,
-      grossSalary, pfContribution, esiContribution, tdsDeduction: tds, 
-      otherDeductions: otherDed, netSalary
+      employeeId,
+      // Parse empty strings to 0.00 for the database
+      basicPay: salaryData.basicPay || 0.00,
+      dearnessAllowance: salaryData.dearnessAllowance || 0.00,
+      houseRentAllowance: salaryData.houseRentAllowance || 0.00,
+      incentives: salaryData.incentives || 0.00,
+      attendanceBonus: salaryData.attendanceBonus || 0.00,
+      cityCompensatoryAllowance: salaryData.cityCompensatoryAllowance || 0.00,
+      mealAllowance: salaryData.mealAllowance || 0.00,
+      uniformAllowance: salaryData.uniformAllowance || 0.00,
+      specialAllowance: salaryData.specialAllowance || 0.00,
+      
+      // Auto-calculated fields sent from frontend
+      grossSalary: salaryData.grossSalary || 0.00,
+      pfContribution: salaryData.pfContribution || 0.00,
+      esiContribution: salaryData.esiContribution || 0.00,
+      
+      // Manual Deductions
+      tdsDeduction: salaryData.tdsDeduction || 0.00,
+      otherDeductions: salaryData.otherDeductions || 0.00,
+      netSalary: salaryData.netSalary || 0.00
     });
 
-    res.status(200).json({ message: 'Salary structure saved successfully', data: structure });
+    res.status(200).json({ message: 'Salary structure saved successfully', structure });
   } catch (error) {
-    console.error('Salary Save Error:', error);
-    res.status(500).json({ message: 'Error saving salary structure.', error: error.message });
+    console.error('Error saving salary structure:', error);
+    res.status(500).json({ message: 'Error saving salary structure', error: error.message });
+  }
+};
+
+// Fetch an existing salary configuration
+exports.getSalaryStructure = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const structure = await SalaryStructure.findOne({ where: { employeeId } });
+    
+    // If no structure exists yet, return an empty object (200 OK, not an error)
+    res.status(200).json(structure || {});
+  } catch (error) {
+    console.error('Error fetching salary structure:', error);
+    res.status(500).json({ message: 'Error fetching salary structure', error: error.message });
   }
 };

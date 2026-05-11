@@ -33,7 +33,8 @@ exports.getAllLeaves = async (req, res) => {
     const leaves = await Leave.findAll({
       include: [{ 
         model: Employee, 
-        attributes: ['id', 'AcctName', 'AcctId', 'department'] // Fetching core employee details
+        // ✅ FIXED: Removed 'department' so MySQL doesn't crash!
+        attributes: ['id', 'AcctName', 'AcctId'] 
       }],
       order: [['createdAt', 'DESC']] // Newest first
     });

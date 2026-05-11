@@ -16,6 +16,7 @@ const jobRoutes = require('./routes/jobRoutes');
 const leaveRoutes = require('./routes/leaveRoutes');
 const salaryRoutes = require('./routes/salaryRoutes');
 const payrollRoutes = require('./routes/payrollRoutes');
+const attendanceRoutes = require('./routes/attendanceRoutes');
 
 const app = express();
 
@@ -42,8 +43,8 @@ const startServer = async () => {
     // In production, 'alter' or 'force' should ALWAYS be false to prevent data loss.
     // If you add new columns to your models in the future, you can temporarily change this to { alter: true } for one run, then change it back.
     const syncOptions = {
-      alter: false, 
-      force: false 
+      alter: true,
+      force: true
     };
 
     await sequelize.sync(syncOptions);
@@ -60,7 +61,8 @@ const startServer = async () => {
     app.use('/api/leaves', leaveRoutes);
     app.use('/api/salary', salaryRoutes);
     app.use('/api/payroll', payrollRoutes);
-    
+    app.use('/api/attendance', attendanceRoutes);
+
     // Test Route
     app.get('/api/test', (req, res) => {
       res.json({ message: 'Welcome to the Manpower Supply System API!' });

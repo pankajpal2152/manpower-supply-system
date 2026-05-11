@@ -57,6 +57,7 @@ module.exports = {
   Job,
   EmpCode,
   Attendance,
-  SalaryStructure ,
-  Payroll
+  SalaryStructure,
+  Payroll,
+  Leave // ✅ ADDED LEAVE HERE
 };

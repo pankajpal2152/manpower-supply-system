@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import api from "../api/axios"; // Adjust this based on your actual path
+import api from "../api/axios"; 
 import "bootstrap/dist/css/bootstrap.min.css";
 // Consolidated Lucide Imports
-import { Plus, Pencil, Trash2, CalendarDays, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, IndianRupee } from "lucide-react";
+import { Plus, Pencil, Trash2, CalendarDays, Search, ArrowUpDown, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, IndianRupee, Eye } from "lucide-react";
 import "./EmployeeManagement.css";
 
 // Shadcn UI and Custom Component Imports
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"; // Added Button import for the trigger
+import { Button } from "@/components/ui/button"; 
 import SalaryStructureForm from "../components/SalaryStructureForm"; 
 
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23cbd5e1'%3E%3Cpath d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/%3E%3C/svg%3E";
@@ -21,6 +21,7 @@ const emptyEmployeeForm = {
   Gender: "M",
   DOB: "",
   MaritalStatus: "Single",
+  BloodGroup: "",
 
   // 2. Personal Address
   CityVillage: "",
@@ -31,12 +32,29 @@ const emptyEmployeeForm = {
   PolicStation: "",
   PinCode: "",
 
-  // 3. Identity
+  // 3. Identity & Licenses
   PanNo: "",
   AadharNo: "",
   VoterNo: "",
+  DrivingLicense: "",
+  DrivingLicenseExpiry: "",
+  GunLicense: "",
+  GunLicenseExpiry: "",
+  IdentificationMark: "",
 
-  // 4. Bank Information
+  // 4. Academic Information
+  HighestQualification: "",
+  InstitutionName: "",
+  PassingYear: "",
+
+  // 5. Employment & Statutory
+  DateOfJoining: "",
+  Designation: "",
+  DeploymentLocation: "",
+  PFNumber: "",
+  ESINumber: "",
+
+  // 6. Bank Information
   BankName: "",
   BankAddress: "",
   IFSCode: "",
@@ -176,7 +194,7 @@ const EmployeeManagement = () => {
   const handleChange = (e) => {
     let { name, value, type, checked } = e.target;
 
-    if (["AcctName", "FathersName"].includes(name)) {
+    if (["AcctName", "FathersName", "IdentificationMark", "InstitutionName", "Designation", "DeploymentLocation"].includes(name)) {
       value = value.replace(/[^a-zA-Z\s.]/g, "");
     }
     if (name === "PinCode") {
@@ -185,11 +203,11 @@ const EmployeeManagement = () => {
     if (name === "AadharNo") {
       value = value.replace(/\D/g, "").slice(0, 12);
     }
-    if (name === "PanNo") {
-      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+    if (name === "PassingYear") {
+      value = value.replace(/\D/g, "").slice(0, 4); 
     }
-    if (name === "VoterNo") {
-      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10);
+    if (["PanNo", "VoterNo", "DrivingLicense", "GunLicense", "PFNumber", "ESINumber"].includes(name)) {
+      value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 20);
     }
     if (name === "IFSCode") {
       value = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 11);
@@ -321,6 +339,7 @@ const EmployeeManagement = () => {
 
           <div className="emp-card-body p-4 bg-white">
             <form id="employeeForm" onSubmit={handleSubmit} className="row g-3">
+              
               {/* --- 1. PERSONAL INFORMATION --- */}
               <div className="col-12">
                 <p className="PerInfo m-0 rounded">Personal Information</p>
@@ -347,20 +366,33 @@ const EmployeeManagement = () => {
               </div>
 
               {/* Form Inputs */}
-              <div className="col-md-6">
+              <div className="col-md-4">
                 <label className="emp-label">Account Name *</label>
                 <input type="text" className="form-control form-control-sm" name="AcctName" value={formData.AcctName} onChange={handleChange} required placeholder="Full Name" />
               </div>
-              <div className="col-md-6">
+              <div className="col-md-4">
                 <label className="emp-label">Father's Name</label>
                 <input type="text" className="form-control form-control-sm" name="FathersName" value={formData.FathersName} onChange={handleChange} placeholder="Father's Name" />
               </div>
-
-              <div className="col-md-4">
+              <div className="col-md-2">
                 <label className="emp-label">Gender</label>
                 <select name="Gender" value={formData.Gender} onChange={handleChange} className="form-select form-select-sm">
                   <option value="M">Male</option>
                   <option value="F">Female</option>
+                </select>
+              </div>
+              <div className="col-md-2">
+                <label className="emp-label">Blood Group</label>
+                <select name="BloodGroup" value={formData.BloodGroup} onChange={handleChange} className="form-select form-select-sm">
+                  <option value="">Select...</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
                 </select>
               </div>
 
@@ -378,6 +410,11 @@ const EmployeeManagement = () => {
                   <option value="Single">Single</option>
                   <option value="Married">Married</option>
                 </select>
+              </div>
+
+              <div className="col-md-4">
+                <label className="emp-label">Identification Mark</label>
+                <input type="text" className="form-control form-control-sm" name="IdentificationMark" value={formData.IdentificationMark} onChange={handleChange} placeholder="Visible physical mark" />
               </div>
 
               {/* --- 2. PERSONAL ADDRESS --- */}
@@ -461,9 +498,9 @@ const EmployeeManagement = () => {
                 <input type="text" className="form-control form-control-sm" name="PinCode" value={formData.PinCode} onChange={handleChange} placeholder="Pin Code" />
               </div>
 
-              {/* --- 3. IDENTITY --- */}
+              {/* --- 3. IDENTITY & LICENSES --- */}
               <div className="col-12 mt-4">
-                <p className="PerInfo m-0 rounded">Identity</p>
+                <p className="PerInfo m-0 rounded">Identity & Licenses</p>
               </div>
               <div className="col-md-4">
                 <label className="emp-label">PAN No</label>
@@ -478,7 +515,77 @@ const EmployeeManagement = () => {
                 <input type="text" className="form-control form-control-sm" name="VoterNo" value={formData.VoterNo} onChange={handleChange} placeholder="Voter No" />
               </div>
 
-              {/* --- 4. BANK INFORMATION --- */}
+              {/* License Fields with Expiry dates side-by-side */}
+              <div className="col-md-3">
+                <label className="emp-label">Driving License</label>
+                <input type="text" className="form-control form-control-sm" name="DrivingLicense" value={formData.DrivingLicense} onChange={handleChange} placeholder="DL Number" />
+              </div>
+              <div className="col-md-3">
+                <label className="emp-label">DL Expiry Date</label>
+                <div className="position-relative">
+                  <input type="date" className="form-control form-control-sm modern-date-input" name="DrivingLicenseExpiry" value={formData.DrivingLicenseExpiry} onChange={handleChange} />
+                  <CalendarDays size={16} className="position-absolute text-muted" style={{ right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 0 }} />
+                </div>
+              </div>
+              
+              <div className="col-md-3">
+                <label className="emp-label">Gun License</label>
+                <input type="text" className="form-control form-control-sm" name="GunLicense" value={formData.GunLicense} onChange={handleChange} placeholder="Gun License Number" />
+              </div>
+              <div className="col-md-3">
+                <label className="emp-label">Gun Expiry Date</label>
+                <div className="position-relative">
+                  <input type="date" className="form-control form-control-sm modern-date-input" name="GunLicenseExpiry" value={formData.GunLicenseExpiry} onChange={handleChange} />
+                  <CalendarDays size={16} className="position-absolute text-muted" style={{ right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 0 }} />
+                </div>
+              </div>
+
+              {/* --- 4. ACADEMIC INFORMATION --- */}
+              <div className="col-12 mt-4">
+                <p className="PerInfo m-0 rounded">Academic Information</p>
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Highest Qualification</label>
+                <input type="text" className="form-control form-control-sm" name="HighestQualification" value={formData.HighestQualification} onChange={handleChange} placeholder="e.g. B.A., 12th Pass" />
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Name of Institution</label>
+                <input type="text" className="form-control form-control-sm" name="InstitutionName" value={formData.InstitutionName} onChange={handleChange} placeholder="School/College Name" />
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Passing Year</label>
+                <input type="text" className="form-control form-control-sm" name="PassingYear" value={formData.PassingYear} onChange={handleChange} placeholder="YYYY" />
+              </div>
+
+              {/* --- 5. EMPLOYMENT & STATUTORY --- */}
+              <div className="col-12 mt-4">
+                <p className="PerInfo m-0 rounded">Employment & Statutory</p>
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Date of Joining</label>
+                <div className="position-relative">
+                  <input type="date" className="form-control form-control-sm modern-date-input" name="DateOfJoining" value={formData.DateOfJoining} onChange={handleChange} />
+                  <CalendarDays size={16} className="position-absolute text-muted" style={{ right: '10px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', zIndex: 0 }} />
+                </div>
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Designation</label>
+                <input type="text" className="form-control form-control-sm" name="Designation" value={formData.Designation} onChange={handleChange} placeholder="e.g. Security Guard" />
+              </div>
+              <div className="col-md-4">
+                <label className="emp-label">Deployment Location</label>
+                <input type="text" className="form-control form-control-sm" name="DeploymentLocation" value={formData.DeploymentLocation} onChange={handleChange} placeholder="Site Name / Location" />
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">PF Number</label>
+                <input type="text" className="form-control form-control-sm" name="PFNumber" value={formData.PFNumber} onChange={handleChange} placeholder="Provident Fund No." />
+              </div>
+              <div className="col-md-6">
+                <label className="emp-label">ESI Number</label>
+                <input type="text" className="form-control form-control-sm" name="ESINumber" value={formData.ESINumber} onChange={handleChange} placeholder="ESI Insurance No." />
+              </div>
+
+              {/* --- 6. BANK INFORMATION --- */}
               <div className="col-12 mt-4">
                 <p className="PerInfo m-0 rounded">Bank Information</p>
               </div>
@@ -537,27 +644,41 @@ const EmployeeManagement = () => {
                   <th className="py-3 ps-4 sticky-col-left">Profile</th>
                   <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AcctId')}>Emp ID {renderSortIcon('AcctId')}</th>
                   <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AcctName')}>Name {renderSortIcon('AcctName')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('Designation')}>Designation {renderSortIcon('Designation')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('DateOfJoining')}>DOJ {renderSortIcon('DateOfJoining')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('DeploymentLocation')}>Location {renderSortIcon('DeploymentLocation')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('Gender')}>Gender {renderSortIcon('Gender')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('BloodGroup')}>Blood Group {renderSortIcon('BloodGroup')}</th>
                   <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('FathersName')}>Father's Name {renderSortIcon('FathersName')}</th>
-                  <th className="py-3">Gender</th>
-                  <th className="py-3">DOB</th>
-                  <th className="py-3">Marital Status</th>
-                  <th className="py-3">City/Village</th>
-                  <th className="py-3">State</th>
-                  <th className="py-3">District</th>
-                  <th className="py-3">PIN</th>
-                  <th className="py-3">PAN No</th>
-                  <th className="py-3">Aadhar No</th>
-                  <th className="py-3">Voter No</th>
-                  <th className="py-3">Bank Name</th>
-                  <th className="py-3">IFS Code</th>
-                  <th className="py-3">Account No</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('DOB')}>DOB {renderSortIcon('DOB')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('MaritalStatus')}>Marital Status {renderSortIcon('MaritalStatus')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('IdentificationMark')}>Ident. Mark {renderSortIcon('IdentificationMark')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('CityVillage')}>City/Village {renderSortIcon('CityVillage')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('State')}>State {renderSortIcon('State')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('District')}>District {renderSortIcon('District')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('PinCode')}>PIN {renderSortIcon('PinCode')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('PanNo')}>PAN No {renderSortIcon('PanNo')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AadharNo')}>Aadhar No {renderSortIcon('AadharNo')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('VoterNo')}>Voter No {renderSortIcon('VoterNo')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('DrivingLicense')}>Driving Lic. {renderSortIcon('DrivingLicense')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('DrivingLicenseExpiry')}>DL Expiry {renderSortIcon('DrivingLicenseExpiry')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('GunLicense')}>Gun Lic. {renderSortIcon('GunLicense')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('GunLicenseExpiry')}>Gun Expiry {renderSortIcon('GunLicenseExpiry')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('HighestQualification')}>Highest Qual. {renderSortIcon('HighestQualification')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('InstitutionName')}>Institution {renderSortIcon('InstitutionName')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('PassingYear')}>Pass Year {renderSortIcon('PassingYear')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('PFNumber')}>PF No {renderSortIcon('PFNumber')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('ESINumber')}>ESI No {renderSortIcon('ESINumber')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('BankName')}>Bank Name {renderSortIcon('BankName')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('IFSCode')}>IFS Code {renderSortIcon('IFSCode')}</th>
+                  <th className="py-3 cursor-pointer sortable-header" onClick={() => handleSort('AcctNo')}>Account No {renderSortIcon('AcctNo')}</th>
                   <th className="py-3 text-end pe-4 sticky-col-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {currentItems.length === 0 ? (
                   <tr>
-                    <td colSpan="18" className="text-center py-5 text-muted fw-bold">
+                    <td colSpan="32" className="text-center py-5 text-muted fw-bold">
                       {searchTerm ? "No employees match your search criteria." : "No active employees found. Please register an employee above."}
                     </td>
                   </tr>
@@ -573,10 +694,15 @@ const EmployeeManagement = () => {
                       </td>
                       <td className="text-primary fw-bold">{emp.AcctId || "N/A"}</td>
                       <td className="fw-bold text-dark">{emp.AcctName || "-"}</td>
-                      <td>{emp.FathersName || "-"}</td>
+                      <td className="fw-bold text-secondary">{emp.Designation || "-"}</td>
+                      <td>{emp.DateOfJoining || "-"}</td>
+                      <td>{emp.DeploymentLocation || "-"}</td>
                       <td>{emp.Gender === 'M' ? 'Male' : emp.Gender === 'F' ? 'Female' : "-"}</td>
+                      <td>{emp.BloodGroup || "-"}</td>
+                      <td>{emp.FathersName || "-"}</td>
                       <td>{emp.DOB || "-"}</td>
                       <td>{emp.MaritalStatus || "-"}</td>
+                      <td>{emp.IdentificationMark || "-"}</td>
                       <td>{emp.CityVillage || "-"}</td>
                       <td>{emp.State || "-"}</td>
                       <td>{emp.District || "-"}</td>
@@ -584,13 +710,22 @@ const EmployeeManagement = () => {
                       <td>{emp.PanNo || "-"}</td>
                       <td>{emp.AadharNo || "-"}</td>
                       <td>{emp.VoterNo || "-"}</td>
+                      <td>{emp.DrivingLicense || "-"}</td>
+                      <td>{emp.DrivingLicenseExpiry || "-"}</td>
+                      <td>{emp.GunLicense || "-"}</td>
+                      <td>{emp.GunLicenseExpiry || "-"}</td>
+                      <td>{emp.HighestQualification || "-"}</td>
+                      <td>{emp.InstitutionName || "-"}</td>
+                      <td>{emp.PassingYear || "-"}</td>
+                      <td>{emp.PFNumber || "-"}</td>
+                      <td>{emp.ESINumber || "-"}</td>
                       <td>{emp.BankName || "-"}</td>
                       <td>{emp.IFSCode || "-"}</td>
                       <td>{emp.AcctNo || "-"}</td>
                       <td className="text-end pe-4 sticky-col-right bg-white">
                         <div className="d-flex justify-content-end align-items-center gap-2">
                           
-                          {/* NEW: Salary Setup Button / Modal */}
+                          {/* Salary Setup Modal (Fixed Transparency) */}
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button size="sm" variant="outline" className="text-green-600 border-green-200 hover:bg-green-50 px-2 py-1 h-auto">
@@ -598,16 +733,26 @@ const EmployeeManagement = () => {
                               </Button>
                             </DialogTrigger>
                             
-                            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                              <SalaryStructureForm employeeId={emp.id} /> 
+                            {/* Updated Enterprise Full-Screen Modal Classes */}
+                            <DialogContent className="!max-w-[100vw] !w-screen !h-screen !m-0 !p-4 sm:!p-8 bg-slate-50 border-0 rounded-none z-[99999] overflow-y-auto flex flex-col">
+                              <div className="container mx-auto flex-grow flex justify-center items-start">
+                                <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 sm:p-8 w-full max-w-5xl h-auto min-h-[80vh]">
+                                  <SalaryStructureForm employeeId={emp.id} /> 
+                                </div>
+                              </div>
                             </DialogContent>
                           </Dialog>
 
+                          {/* New View Button */}
+                          <button onClick={() => alert(`View details feature for ${emp.AcctName} coming soon.`)} className="btn btn-sm btn-outline-info enterprise-btn" title="View Profile">
+                            <Eye size={14} />
+                          </button>
+
                           {/* Existing Edit and Delete Buttons */}
-                          <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary enterprise-btn">
+                          <button onClick={() => handleEdit(emp)} className="btn btn-sm btn-outline-secondary enterprise-btn" title="Edit Record">
                             <Pencil size={14} />
                           </button>
-                          <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger enterprise-btn">
+                          <button onClick={() => handleDelete(emp.id)} className="btn btn-sm btn-outline-danger enterprise-btn" title="Delete Record">
                             <Trash2 size={14} />
                           </button>
                         </div>
